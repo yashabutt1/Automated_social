@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lovelens.approvebot</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/yashabutt/love-lens-pipeline/.venv/bin/python</string>
+    <string>/Users/yashabutt/love-lens-pipeline/approve_bot.py</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/yashabutt/love-lens-pipeline</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/yashabutt/love-lens-pipeline/approvebot.out</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/yashabutt/love-lens-pipeline/approvebot.err</string>
+</dict>
+</plist>

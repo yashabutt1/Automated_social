@@ -15,7 +15,10 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 ROOT = Path(__file__).resolve().parent
 LOG_FILE = ROOT / "approval_log.txt"
 REJECTED_DIR = ROOT / "rejected"
+POSTED_DIR = ROOT / "posted"
+OFFSET_FILE = ROOT / "last_update_offset.txt"
 REJECTED_DIR.mkdir(exist_ok=True)
+POSTED_DIR.mkdir(exist_ok=True)
 
 
 def _env(name: str) -> str:
@@ -51,6 +54,19 @@ def _get_updates(offset: int = 0):
     return payload.get("result", [])
 
 
+def _load_offset() -> int:
+    if not OFFSET_FILE.exists():
+        return 0
+    try:
+        return int(OFFSET_FILE.read_text(encoding="utf-8").strip())
+    except Exception:
+        return 0
+
+
+def _save_offset(offset: int):
+    OFFSET_FILE.write_text(str(offset), encoding="utf-8")
+
+
 def _answer_callback(query_id, text):
     token = _env("TELEGRAM_BOT_TOKEN")
     url = f"https://api.telegram.org/bot{token}/answerCallbackQuery"
@@ -72,6 +88,11 @@ def _move_to_rejected(filename: str):
     return None
 
 
+def _posted_marker(latest: Path, filename: str) -> Path:
+    marker_name = f"{latest.name}_{filename}"
+    return POSTED_DIR / marker_name
+
+
 def process_update(update):
     callback = update.get("callback_query")
     if not callback:
@@ -83,23 +104,34 @@ def process_update(update):
     if not data.startswith(("approve:", "reject:")):
         return
     action, filename = data.split(":", 1)
+    latest = _latest_output_dir()
+    image_path = latest / "cards" / filename
+    posted_marker = _posted_marker(latest, filename)
+
     if action == "approve":
-        image_path = _latest_output_dir() / "cards" / filename
+        if posted_marker.exists():
+            _answer_callback(query_id, "Already posted")
+            _edit_message(chat_id, message_id, f"Already posted {filename}")
+            _log(f"Already posted {filename}, skipped")
+            return
         if not image_path.exists():
             _answer_callback(query_id, "Image not found")
             _log(f"Approve failed: {filename} missing")
             return
         try:
             caption = ""
-            latest = _latest_output_dir()
             captions_path = latest / "captions.json"
             if captions_path.exists():
                 payload = json.loads(captions_path.read_text(encoding="utf-8"))
                 for item in payload.get("cards", []):
                     if item.get("file") == filename:
-                        caption = item.get("caption", "")
+                        caption = item.get("caption", "").strip()
                         break
             result = post_fb.post_card(str(image_path), caption)
+            try:
+                posted_marker.write_text("posted", encoding="utf-8")
+            except Exception as write_exc:
+                _log(f"Warning: could not write posted marker for {filename}: {write_exc}")
             post_id = result.get("id")
             page_id = os.getenv("FB_PAGE_ID", "").strip()
             link = f"https://www.facebook.com/{page_id}/posts/{post_id}" if page_id and post_id else str(post_id or "")
@@ -117,12 +149,13 @@ def process_update(update):
 
 
 def main():
-    offset = 0
+    offset = _load_offset()
     while True:
         updates = _get_updates(offset)
         for update in updates:
             process_update(update)
             offset = max(offset, update.get("update_id", 0) + 1)
+            _save_offset(offset)
         time.sleep(2)
 
 
