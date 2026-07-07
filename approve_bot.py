@@ -2,7 +2,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -29,7 +29,7 @@ def _env(name: str) -> str:
 
 
 def _log(message: str):
-    line = f"[{datetime.utcnow().isoformat()}] {message}"
+    line = f"[{datetime.now(timezone.utc).isoformat()}] {message}"
     print(line)
     with LOG_FILE.open("a", encoding="utf-8") as fh:
         fh.write(line + "\n")
@@ -46,8 +46,8 @@ def _latest_output_dir() -> Path:
 def _get_updates(offset: int = 0):
     token = _env("TELEGRAM_BOT_TOKEN")
     url = f"https://api.telegram.org/bot{token}/getUpdates"
-    params = {"timeout": 10, "offset": offset}
-    resp = requests.get(url, params=params, timeout=30)
+    params = {"timeout": 50, "offset": offset}
+    resp = requests.get(url, params=params, timeout=60)
     payload = resp.json()
     if not payload.get("ok"):
         raise RuntimeError(json.dumps(payload, indent=2))
@@ -151,11 +151,20 @@ def process_update(update):
 def main():
     offset = _load_offset()
     while True:
-        updates = _get_updates(offset)
-        for update in updates:
-            process_update(update)
-            offset = max(offset, update.get("update_id", 0) + 1)
-            _save_offset(offset)
+        try:
+            updates = _get_updates(offset)
+            for update in updates:
+                process_update(update)
+                offset = max(offset, update.get("update_id", 0) + 1)
+                _save_offset(offset)
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError, requests.exceptions.RequestException) as exc:
+            _log(f"network hiccup, retrying: {exc}")
+            time.sleep(3)
+            continue
+        except Exception as exc:
+            _log(f"unexpected loop error, retrying: {exc}")
+            time.sleep(3)
+            continue
         time.sleep(2)
 
 

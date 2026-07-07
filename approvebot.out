@@ -1,0 +1,33 @@
+FB_PAGE_TOKEN is a user token; resolving a Page access token from /me/accounts
+Resolved Page access token from /me/accounts for page 1190858464111261
+{
+  "id": "122099476149389827",
+  "post_id": "1190858464111261_122099476179389827"
+}
+[2026-07-07T04:11:24.780271] Approved and posted paragraph_2.png -> https://www.facebook.com/1190858464111261/posts/122099476149389827
+FB_PAGE_TOKEN is a user token; resolving a Page access token from /me/accounts
+Resolved Page access token from /me/accounts for page 1190858464111261
+{
+  "id": "122099476899389827",
+  "post_id": "1190858464111261_122099476959389827"
+}
+[2026-07-07T04:11:36.894502] Approved and posted paragraph_1.png -> https://www.facebook.com/1190858464111261/posts/122099476899389827
+[2026-07-07T04:11:37.756833] Already posted paragraph_1.png, skipped
+[2026-07-07T04:11:41.844612] Already posted paragraph_1.png, skipped
+FB_PAGE_TOKEN is a user token; resolving a Page access token from /me/accounts
+Resolved Page access token from /me/accounts for page 1190858464111261
+{
+  "id": "122099477223389827",
+  "post_id": "1190858464111261_122099477391389827"
+}
+[2026-07-07T04:11:50.124665] Approved and posted card_2.png -> https://www.facebook.com/1190858464111261/posts/122099477223389827
+FB_PAGE_TOKEN is a user token; resolving a Page access token from /me/accounts
+Resolved Page access token from /me/accounts for page 1190858464111261
+{
+  "id": "122099477583389827",
+  "post_id": "1190858464111261_122099477601389827"
+}
+[2026-07-07T04:11:59.980710] Approved and posted card_1.png -> https://www.facebook.com/1190858464111261/posts/122099477583389827
+[2026-07-07T04:13:23.885753] Already posted card_1.png, skipped
+[2026-07-07T04:13:25.054829] Already posted card_1.png, skipped
+[2026-07-07T04:14:02.440332] Already posted card_1.png, skipped
