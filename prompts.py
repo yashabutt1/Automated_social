@@ -1,58 +1,76 @@
 """
 All text-generation prompts live here so you can tune voice in one place.
 The rules block is the compliance guardrail — keep it strict.
+
+Every prompt is now built around a single *topic* (see topics.py) so each card
+covers different ground instead of circling the same subject every run.
 """
 
-RULES = """You write for a faceless relationship & dating-psychology page.
+RULES = """You write for a warm, faceless love & relationships page.
 Non-negotiable rules:
 - Original wording only. Never copy known quotes, lyrics, or any specific creator's phrasing.
-- Grounded in healthy relationship psychology: attachment, communication, boundaries.
+- Grounded in healthy relationship psychology: connection, communication, care, self-respect.
 - No manipulation tactics, no "get your ex back" tricks, no clinical mental-health diagnoses or claims.
-- Voice: warm, direct, a little poetic, never preachy.
+- Voice: warm, human, a little poetic, never preachy, never abstract poster-speak.
 """
 
 
-def lines_prompt(n: int) -> str:
-    """Prompt for N short quote-card lines."""
+def _topics_block(topics: list[dict]) -> str:
+    lines = ["THE TOPICS FOR THIS BATCH — write exactly one item for EACH, in this",
+             "same order, and keep each item strictly about its own topic:"]
+    for i, t in enumerate(topics, 1):
+        lines.append(f"{i}. Focus: {t['angle']}  |  Tone: {t['tone']}")
+    lines.append('Do NOT default to "anxious texting", "mixed signals", or '
+                 '"situationships" unless a focus above literally says so.')
+    return "\n".join(lines)
+
+
+def _title_rule() -> str:
+    return ('Each item also needs a "title": a 1-3 word evocative phrase (Title Case) '
+            'that will be set in an elegant script font at the top of the card, like '
+            '"Soft Love" or "Come Home" or "Chosen". No punctuation in the title.')
+
+
+def lines_prompt(topics: list[dict]) -> str:
+    """Prompt for one short quote-card line per topic (single batched call)."""
+    n = len(topics)
     return f"""{RULES}
-Write {n} original one-line relationship lines for quote cards.
-Each line should sound like something a real person would say, text, or think when they are tired of anxious texting, mixed signals, or being stuck in a situationship.
-Use warm, conversational language, not abstract poster-speak or preachy advice.
-Balance the batch so it includes some validating comfort, some honest truth, some practical next-step energy, and one lighter, slightly hopeful beat.
-Ground the writing in real situations: waiting for a plan, feeling like the only one trying, being ghosted, anxious replies, moving on, asking for what you need, and rebuilding confidence.
-Keep it helpful by naming a small action or mindset shift, not just the problem.
-Avoid manipulation tactics, clinical claims, or the idea that your worth depends on another person's attention.
+{_topics_block(topics)}
 
-Examples:
-- "If you have to convince someone to stay, you're already doing the work for a person who isn't showing up. Try spending that energy on a plan you actually want."
-- "A slow reply doesn't mean you're bad news. It means they are not ready to treat you like someone they want." 
-- "When your messages feel like a second job, take one evening off from checking your phone and notice how much lighter you feel."
-- "You can be kind and still say no to being the fallback option. That's how you make space for someone who chooses you first."
+Write exactly {n} original one-line quote-card lines — one for each topic above, in order.
+Each line should sound like something a real person would genuinely say, text, or
+think in that exact feeling — warm and conversational, not abstract advice.
+Vary the rhythm so the lines don't sound formulaic. Where it fits, name a small
+action, image, or mindset shift instead of only describing the feeling.
 
-Respond with ONLY a JSON array of objects, no markdown, no backticks:
-[{{"line": "...", "caption": "one warm sentence + a soft question for the comments", "hashtags": ["...", "..."]}}]
-Give 6 to 9 hashtags each, mixing broad and niche."""
+{_title_rule()}
+
+Respond with ONLY a JSON array of exactly {n} objects, in the same order as the topics,
+no markdown, no backticks:
+[{{"title": "...", "line": "...", "caption": "one warm sentence + a soft question for the comments", "hashtags": ["...", "..."]}}]
+Give 6 to 9 hashtags each, mixing broad and niche, relevant to that item's topic."""
 
 
-def paragraph_prompt(n: int) -> str:
-    """Prompt for N relationship micro-essay cards."""
+def paragraph_prompt(topics: list[dict]) -> str:
+    """Prompt for one micro-essay card per topic (single batched call)."""
+    n = len(topics)
     return f"""{RULES}
-Write {n} original relationship micro-essay cards.
-Each should be 5 to 9 short lines, with each line feeling like a real person noticing a relationship pattern and saying one small thing they can try instead.
-Keep the voice warm, conversational, and grounded in everyday dating experiences: anxious texting, mixed signals, feeling unseen, situationships, being the only one trying, moving on, or finally asking for a real answer.
-The batch should include a mix of relatable truth, comforting reassurance, a practical next step, and one gentle, slightly lighter beat.
-Show a helpful choice instead of only the problem.
-Do not use abstract words like journey, worth, authentic self, profound, or unwavering.
+{_topics_block(topics)}
 
-Examples:
-- "If you're waiting for them to decide, say what you need and then do something that makes you feel steady. That is not cold. That is choosing yourself."
-- "When every reply feels like a test, the kindest thing you can do is stop grading their attention and start protecting your peace."
-- "A situationship with no plans is not mysterious; it's a pattern. You can ask for one clear next step and see if they can meet you there."
-- "There's no shame in moving on from someone who only reaches out when they are bored. You're not giving up; you're making room."
+Write exactly {n} original micro-essay cards — one for each topic above, in order.
+Each should be 5 to 8 short lines. Each line feels like a real person noticing
+something true about that specific feeling and, where natural, offering one small,
+gentle thing to try or hold onto.
+Keep the voice warm, human, and specific to each topic. Do not use abstract words
+like journey, worth, authentic self, profound, or unwavering. Match each item's tone
+rather than turning every card into a hard truth.
 
-Respond with ONLY a JSON array of objects, no markdown, no backticks:
-[{{"body": "line one\nline two\nline three", "caption": "one warm sentence + a soft question for the comments", "hashtags": ["...", "..."]}}]
-Give 6 to 9 hashtags each, mixing broad and niche."""
+{_title_rule()}
+
+Respond with ONLY a JSON array of exactly {n} objects, in the same order as the topics,
+no markdown, no backticks:
+[{{"title": "...", "body": "line one\\nline two\\nline three", "caption": "one warm sentence + a soft question for the comments", "hashtags": ["...", "..."]}}]
+Give 6 to 9 hashtags each, mixing broad and niche, relevant to that item's topic."""
 
 
 def reels_prompt(n: int, formats: list[str]) -> str:

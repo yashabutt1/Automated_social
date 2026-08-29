@@ -11,7 +11,6 @@ import argparse
 import html
 import json
 import os
-import random
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -26,6 +25,7 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 
 import config
 import dedupe
+import topics
 
 
 def parse_args(argv=None):
@@ -54,10 +54,14 @@ def build_review_html(day_dir, cards, reels):
     for i, c in enumerate(cards, 1):
         tags = " ".join(("#" + t.lstrip("#")) for t in c["hashtags"])
         meta = ""
+        if c.get("title"):
+            meta += f"<p class=\"ttl\">{html.escape(c['title'])}</p>"
+        if c.get("topic"):
+            meta += f"<p class=\"topic\">topic: {html.escape(c['topic'])}</p>"
         if c.get("body"):
-            meta = f"<p class=\"cap\">{html.escape(c['body'])}</p>"
+            meta += f"<p class=\"cap\">{html.escape(c['body'])}</p>"
         else:
-            meta = f"<p class=\"cap\">{html.escape(c['caption'])}</p>"
+            meta += f"<p class=\"cap\">{html.escape(c['caption'])}</p>"
         rows.append(f"""
         <div class="card">
           <img src="cards/{c['file']}" alt="card {i}">
@@ -90,6 +94,8 @@ def build_review_html(day_dir, cards, reels):
   .card{{display:flex;gap:20px;background:#251e30;border:1px solid #3a2f47;border-radius:14px;padding:16px;margin:16px 0}}
   .card img{{width:220px;border-radius:10px}}
   .meta{{flex:1}} .cap{{font-size:15px;line-height:1.5}} .tags{{color:#b0a4dc;font-size:13px}}
+  .ttl{{font-size:20px;color:#e6b489;margin:0 0 2px;font-style:italic}}
+  .topic{{font-size:12px;color:#7d7391;margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px}}
   label{{display:block;margin-top:12px;color:#e6b489;font-size:14px}}
   .reel{{background:#251e30;border:1px solid #3a2f47;border-radius:14px;padding:16px;margin:16px 0}}
   .hook{{font-size:18px;font-weight:600;color:#e8a0a8}} ol{{line-height:1.6}}
@@ -107,6 +113,22 @@ Approve the good ones, delete the rest, then load into your scheduler.</p>
     (day_dir / "review.html").write_text(doc, encoding="utf-8")
 
 
+def _dedup_one(item, used_content, key, generator):
+    """Return a non-duplicate version of ``item``; never raises.
+
+    If a fresh variant can't be found (e.g. the free-tier quota is spent and the
+    generator keeps returning the same fallback), keep the item as-is — the human
+    Telegram approval step is the final guard against anything stale.
+    """
+    try:
+        [item] = dedupe.ensure_unique_items([item], used_content, key, generator, attempts=3)
+    except RuntimeError:
+        value = dedupe._normalize_text(item.get(key, ""))
+        if value:
+            used_content.add(value)
+    return item
+
+
 def generate_batch(offset_days: int = 0):
     import gen_image
     import gen_text
@@ -117,36 +139,48 @@ def generate_batch(offset_days: int = 0):
 
     used_content = dedupe.load_used_content(config.OUTPUT_DIR)
 
-    print("· writing quote-card lines…")
-    lines = gen_text.make_lines(config.CARDS_PER_RUN)
-    lines = dedupe.ensure_unique_items(lines, used_content, "line", lambda: gen_text.make_lines(1)[0], attempts=6)
+    # Each card gets its own distinct, recently-unused topic so the feed keeps
+    # moving through different subjects instead of repeating one lane.
+    chosen = topics.pick_topics(
+        config.CARDS_PER_RUN + config.PARAGRAPH_CARDS_PER_RUN, config.OUTPUT_DIR)
+    line_topics = chosen[: config.CARDS_PER_RUN]
+    para_topics = chosen[config.CARDS_PER_RUN :]
+    print("· topics this batch: " + ", ".join(t["id"] for t in chosen))
 
+    cards = []
+
+    # One batched Gemini call for all quote lines, one for all paragraphs, so a
+    # full day stays well under the free-tier request cap.
+    print("· writing quote-card lines…")
+    line_items = gen_text.make_lines(line_topics)
     print("· writing paragraph cards…")
-    paragraphs = gen_text.make_paragraphs(config.PARAGRAPH_CARDS_PER_RUN)
-    paragraphs = dedupe.ensure_unique_items(paragraphs, used_content, "body", lambda: gen_text.make_paragraphs(1)[0], attempts=6)
+    para_items = gen_text.make_paragraphs(para_topics)
+
+    for i, (topic, item) in enumerate(zip(line_topics, line_items), 1):
+        # Regenerate just this item if its wording duplicates something posted before.
+        item = _dedup_one(item, used_content, "line",
+                          lambda t=topic: gen_text.make_lines([t])[0])
+        print(f"· quote card {i}/{len(line_topics)} — topic '{topic['id']}' — background…")
+        bg = gen_image.make_background(topic, day_dir / "backgrounds" / f"bg_{i}.png")
+        card_file = f"card_{i}.png"
+        print("  composing text…")
+        compose.make_card(bg, item["line"], day_dir / "cards" / card_file,
+                          title=item.get("title"))
+        cards.append({**item, "file": card_file, "topic": topic["id"]})
+
+    for i, (topic, item) in enumerate(zip(para_topics, para_items), 1):
+        item = _dedup_one(item, used_content, "body",
+                          lambda t=topic: gen_text.make_paragraphs([t])[0])
+        print(f"· paragraph card {i}/{len(para_topics)} — topic '{topic['id']}' — background…")
+        bg = gen_image.make_background(topic, day_dir / "backgrounds" / f"para_{i}.png")
+        card_file = f"paragraph_{i}.png"
+        print("  composing paragraph…")
+        compose.make_paragraph_card(bg, item["body"], day_dir / "cards" / card_file,
+                                    title=item.get("title"))
+        cards.append({**item, "file": card_file, "body": item["body"], "topic": topic["id"]})
 
     print("· writing reel scripts…")
     reels = gen_text.make_reels(config.REELS_PER_RUN)
-
-    cards = []
-    moods = random.sample(config.BACKGROUND_MOODS, min(len(lines) + len(paragraphs), len(config.BACKGROUND_MOODS)))
-    for i, item in enumerate(lines, 1):
-        mood = moods[(i - 1) % len(moods)]
-        print(f"· quote card {i}/{len(lines)} — background…")
-        bg = gen_image.make_background(mood, day_dir / "backgrounds" / f"bg_{i}.png")
-        card_file = f"card_{i}.png"
-        print("  composing text…")
-        compose.make_card(bg, item["line"], day_dir / "cards" / card_file)
-        cards.append({**item, "file": card_file})
-
-    for i, item in enumerate(paragraphs, 1):
-        mood = moods[(len(lines) + i - 1) % len(moods)]
-        print(f"· paragraph card {i}/{len(paragraphs)} — background…")
-        bg = gen_image.make_background(mood, day_dir / "backgrounds" / f"para_{i}.png")
-        card_file = f"paragraph_{i}.png"
-        print("  composing paragraph…")
-        compose.make_paragraph_card(item["body"], day_dir / "cards" / card_file)
-        cards.append({**item, "file": card_file, "body": item["body"]})
 
     (day_dir / "captions.json").write_text(
         json.dumps({"cards": cards, "reels": reels}, indent=2), encoding="utf-8")

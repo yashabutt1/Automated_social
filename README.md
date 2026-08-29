@@ -9,8 +9,10 @@ The Love Lens generates a daily batch of quote cards and paragraph cards, writes
 - [approve_bot.py](approve_bot.py): listens for Telegram callback taps, looks up the matching caption from the batch's captions.json entry, posts approved cards to Facebook, and avoids reposting cards after a restart by tracking already-posted files.
 - [post_fb.py](post_fb.py): handles the Facebook Page photo post request using the Page access token and the card caption.
 - [dedupe.py](dedupe.py): checks new lines and paragraph bodies against previously generated captions so the pipeline avoids repeating content.
-- [gen_image.py](gen_image.py): generates the local background image for each card.
-- [compose.py](compose.py): renders the final quote-card and paragraph-card images with Pillow.
+- [topics.py](topics.py): a wide taxonomy of love/relationship topics (warm, self-love, hope, healing, communication, gratitude, committed, playful, longing, boundaries). Each run picks distinct, recently-unused topics so the feed keeps covering new ground instead of repeating one lane. Recent picks are remembered in `output/.topic_history.json`.
+- [fetch_image.py](fetch_image.py): fetches an attractive, topic-matched portrait photo from Pexels, crops it to the card size, and remembers recently-used photo IDs (`output/.pexels_history.json`) so images don't repeat. Needs `PEXELS_API_KEY`; fails soft to the gradient when absent.
+- [gen_image.py](gen_image.py): returns the background for each card — a Pexels photo when available, otherwise the original locally-drawn Pillow gradient.
+- [compose.py](compose.py): renders the final decorated cards with Pillow — background photo, a readability scrim, soft floral corner accents, an elegant script title (Snell Roundhand), and the serif body text.
 - [run_daily_guard.sh](run_daily_guard.sh): the cron-friendly wrapper that runs the daily generation and notification flow safely. It checks output/.last_run_date, skips if the job already ran today, and only writes the marker after both generation and notification succeed.
 - [prompts.py](prompts.py): stores the text-generation prompts for lines, paragraphs, and reels.
 - [config.py](config.py): central settings for branding, model names, output size, background moods, and batch size.
@@ -25,6 +27,9 @@ The Love Lens generates a daily batch of quote cards and paragraph cards, writes
    ```bash
    cp .env.example .env
    ```
+   For attractive photo backgrounds, add a free `PEXELS_API_KEY` (get one at
+   https://www.pexels.com/api/). Without it, cards fall back to gradient backgrounds.
+   To turn photos off entirely, set `IMAGE_SOURCE = "gradient"` in [config.py](config.py).
 3. Add the brand font if you want the cards to look more polished. See [fonts/README.txt](fonts/README.txt).
 
 Do not commit your actual .env file. Keep secrets in environment variables only.

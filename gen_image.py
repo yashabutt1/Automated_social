@@ -1,8 +1,10 @@
-"""Local background generation for The Love Lens.
+"""Background generation for The Love Lens.
 
-Backgrounds are drawn with Pillow so the pipeline can run without any image API
-calls. The mood argument is accepted for compatibility with the existing pipeline
-and is used to rotate palette choices.
+Preferred path: fetch an attractive, topic-matched stock photo from Pexels
+(fetch_image.py). If that is unavailable (no PEXELS_API_KEY, no network, nothing
+found) we fall back to a locally-drawn Pillow gradient so the pipeline always
+produces a card. The gradient path takes no network and keeps the offline tests
+green.
 """
 from pathlib import Path
 
@@ -13,10 +15,16 @@ import config
 
 def _palette_for_mood(mood: str):
     palettes = [
-        ("plum", "#1a1424", "#0f0a16"),
-        ("ember", "#1f1518", "#120c0e"),
-        ("indigo", "#141830", "#0d0f1c"),
-        ("teal", "#12201c", "#0b1512"),
+        ("plum", "#42245f", "#150a1f"),
+        ("navy", "#152f63", "#0a1730"),
+        ("maroon", "#5a1325", "#1a0710"),
+        ("pumpkin", "#85410c", "#241004"),
+        ("forest", "#14492a", "#0a1f12"),
+        ("mustard", "#6f530e", "#201705"),
+        ("rust", "#6b260c", "#200b03"),
+        ("teal", "#125046", "#0a2019"),
+        ("indigo", "#22266d", "#0d0f2a"),
+        ("burgundy", "#540d2b", "#1a0512"),
     ]
     if not mood:
         return palettes[0]
@@ -35,8 +43,8 @@ def _add_grain(img: Image.Image) -> Image.Image:
     return Image.blend(img, noise.convert("RGB"), 0.02)
 
 
-def make_background(mood: str, out_path, w=None, h=None) -> str:
-    """Generate a soft branded background locally and save it as a PNG."""
+def make_gradient_background(mood: str, out_path, w=None, h=None) -> str:
+    """Generate a soft branded gradient locally and save it as a PNG."""
     w = w or config.CARD_W
     h = h or config.CARD_H
     out_path = Path(out_path)
@@ -58,3 +66,24 @@ def make_background(mood: str, out_path, w=None, h=None) -> str:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     img.save(out_path)
     return str(out_path)
+
+
+def make_background(mood, out_path, w=None, h=None) -> str:
+    """Return a background image path for a card.
+
+    ``mood`` may be a topic dict (preferred — enables photo search) or a plain
+    mood string (used for the gradient palette). Tries Pexels first when the
+    source is enabled and a key is present, then falls back to the gradient.
+    """
+    if config.IMAGE_SOURCE == "pexels":
+        try:
+            import fetch_image
+
+            result = fetch_image.fetch_background(mood, out_path, w, h)
+            if result:
+                return result
+        except Exception as exc:  # pragma: no cover - defensive
+            print(f"  photo fetch errored ({exc}); using local gradient")
+
+    mood_str = mood.get("mood", "") if isinstance(mood, dict) else (mood or "")
+    return make_gradient_background(mood_str, out_path, w, h)

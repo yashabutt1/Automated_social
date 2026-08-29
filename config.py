@@ -8,21 +8,29 @@ from pathlib import Path
 # Brand identity
 # ---------------------------------------------------------------------------
 PAGE_NAME = "The Love Lens"
-HANDLE = "@thelovelens"          # shown small on cards; set to "" to hide
+HANDLE = "@thelovelensforall"    # shown small on cards; set to "" to hide
 
 # ---------------------------------------------------------------------------
 # Models  (verify current names at ai.google.dev/gemini-api/docs/models)
 # ---------------------------------------------------------------------------
-# One GEMINI_API_KEY powers the text side. Backgrounds are generated locally
-# with Pillow, so the image model config is retained only as metadata.
+# GEMINI_API_KEY powers the text side. Backgrounds now come from Pexels stock
+# photos (free API key -> PEXELS_API_KEY in .env). Get one at pexels.com/api.
 TEXT_MODEL = "gemini-2.5-flash"          # fast + cheap for copy
 IMAGE_MODEL = "gemini-2.5-flash-image"   # retained for compatibility; not used
+
+# Where card backgrounds come from:
+#   "pexels"   -> real stock photos matched to each card's topic (recommended)
+#   "gradient" -> the original locally-drawn Pillow gradient (offline, no key)
+IMAGE_SOURCE = "pexels"
+
+# Draw soft decorative floral accents in the corners (like the studio example).
+DECORATE_FLORALS = True
 
 # ---------------------------------------------------------------------------
 # How much to make each run
 # ---------------------------------------------------------------------------
-CARDS_PER_RUN = 2      # short quote cards (text on generated background)
-PARAGRAPH_CARDS_PER_RUN = 2  # longer micro-essay cards
+CARDS_PER_RUN = 3      # short quote cards (text on photo background)
+PARAGRAPH_CARDS_PER_RUN = 3  # longer micro-essay cards
 REELS_PER_RUN = 1      # reel scripts (text output only, you film/animate)
 
 # ---------------------------------------------------------------------------
@@ -47,6 +55,12 @@ AI_CONTENT_LABEL = True
 FONT_DISPLAY = Path(__file__).parent / "fonts" / "static" / "Fraunces_72pt-SemiBold.ttf"
 FONT_SMALL = Path(__file__).parent / "fonts" / "static" / "Fraunces_72pt-SemiBold.ttf"
 # If a font file is missing the code falls back to PIL's default (works, plainer).
+
+# Elegant script font for the short title on each card (the "Love Journey" look).
+# Snell Roundhand ships with macOS. On another OS, drop a script .ttf into ./fonts
+# and point here; if it's missing the code falls back to Fraunces italic.
+FONT_SCRIPT = Path("/System/Library/Fonts/Supplemental/SnellRoundhand.ttc")
+FONT_SCRIPT_FALLBACK = Path(__file__).parent / "fonts" / "static" / "Fraunces_72pt-SemiBoldItalic.ttf"
 
 # ---------------------------------------------------------------------------
 # Background moods -> local palette choices used by the Pillow renderer.
