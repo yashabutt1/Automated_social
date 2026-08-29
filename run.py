@@ -26,6 +26,7 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 import config
 import dedupe
 import topics
+import reel_visuals
 
 
 def parse_args(argv=None):
@@ -46,6 +47,7 @@ def _day_dir(offset_days: int = 0) -> Path:
     d = config.OUTPUT_DIR / (date.today() + timedelta(days=offset_days)).isoformat()
     (d / "cards").mkdir(parents=True, exist_ok=True)
     (d / "backgrounds").mkdir(parents=True, exist_ok=True)
+    (d / "reels").mkdir(parents=True, exist_ok=True)
     return d
 
 
@@ -142,9 +144,11 @@ def generate_batch(offset_days: int = 0):
     # Each card gets its own distinct, recently-unused topic so the feed keeps
     # moving through different subjects instead of repeating one lane.
     chosen = topics.pick_topics(
-        config.CARDS_PER_RUN + config.PARAGRAPH_CARDS_PER_RUN, config.OUTPUT_DIR)
+        config.CARDS_PER_RUN + config.PARAGRAPH_CARDS_PER_RUN + config.VIDEO_REELS_PER_RUN,
+        config.OUTPUT_DIR)
     line_topics = chosen[: config.CARDS_PER_RUN]
-    para_topics = chosen[config.CARDS_PER_RUN :]
+    para_topics = chosen[config.CARDS_PER_RUN : config.CARDS_PER_RUN + config.PARAGRAPH_CARDS_PER_RUN]
+    reel_topics = chosen[config.CARDS_PER_RUN + config.PARAGRAPH_CARDS_PER_RUN :]
     print("· topics this batch: " + ", ".join(t["id"] for t in chosen))
 
     cards = []
@@ -179,14 +183,71 @@ def generate_batch(offset_days: int = 0):
                                     title=item.get("title"))
         cards.append({**item, "file": card_file, "body": item["body"], "topic": topic["id"]})
 
+    # ---- video reels: stock clip + branded text + music -------------------
+    video_reels = build_video_reels(day_dir, reel_topics, used_content)
+
     print("· writing reel scripts…")
     reels = gen_text.make_reels(config.REELS_PER_RUN)
 
     (day_dir / "captions.json").write_text(
-        json.dumps({"cards": cards, "reels": reels}, indent=2), encoding="utf-8")
+        json.dumps({"cards": cards, "reels": reels, "video_reels": video_reels}, indent=2),
+        encoding="utf-8")
     build_review_html(day_dir, cards, reels)
 
     return day_dir
+
+
+def _reel_caption(item, topic):
+    """Hook line + soft engagement question + follow CTA + hashtags."""
+    tags = " ".join("#" + t.lstrip("#") for t in item.get("hashtags", []))
+    parts = [item.get("line", "").strip()]
+    if item.get("caption"):
+        parts.append(item["caption"].strip())
+    parts.append(f"Follow {config.HANDLE} for a little more love every day. 💛")
+    if tags:
+        parts.append(tags)
+    return "\n\n".join(p for p in parts if p)
+
+
+def build_video_reels(day_dir, reel_topics, used_content):
+    if config.VIDEO_REELS_PER_RUN < 1 or not reel_topics:
+        return []
+    import gen_text
+    import fetch_video
+    import fetch_music
+    import compose_video
+
+    print("· writing reel lines…")
+    reel_items = gen_text.make_lines(reel_topics)
+    visuals = reel_visuals.pick_visuals(len(reel_topics), config.OUTPUT_DIR)
+
+    video_reels = []
+    for i, (topic, item, visual) in enumerate(zip(reel_topics, reel_items, visuals), 1):
+        item = _dedup_one(item, used_content, "line",
+                          lambda t=topic: gen_text.make_lines([t])[0])
+        print(f"· reel {i}/{len(reel_topics)} — words '{topic['id']}' / visual '{visual['category']}' — clip…")
+        clip = fetch_video.fetch_clip(visual, day_dir / "reels" / f"clip_{i}.mp4")
+        if not clip:
+            print("  no clip available (needs PEXELS_API_KEY / network); skipping reel")
+            continue
+        music = fetch_music.pick_track()
+        reel_file = f"reel_{i}.mp4"
+        print(f"  composing reel (music: {os.path.basename(music) if music else 'none'})…")
+        try:
+            compose_video.make_reel(clip["path"], item.get("title"), item["line"],
+                                    day_dir / "reels" / reel_file, music_path=music)
+        except Exception as exc:
+            print(f"  reel compose failed ({exc}); skipping")
+            continue
+        video_reels.append({
+            **item,
+            "file": reel_file,
+            "topic": topic["id"],
+            "visual": visual["category"],
+            "caption": _reel_caption(item, topic),
+            "music": os.path.basename(music) if music else None,
+        })
+    return video_reels
 
 
 def main(argv=None):

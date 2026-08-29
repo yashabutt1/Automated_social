@@ -43,6 +43,31 @@ def send_photo(image_path, caption, callback_data):
     return payload
 
 
+def send_video(video_path, caption, callback_data):
+    video_path = Path(video_path)
+    if not video_path.exists():
+        raise FileNotFoundError(video_path)
+
+    token = _env("TELEGRAM_BOT_TOKEN")
+    chat_id = _env("TELEGRAM_CHAT_ID")
+    url = f"https://api.telegram.org/bot{token}/sendVideo"
+    keyboard = {
+        "inline_keyboard": [[
+            {"text": "✅ Approve", "callback_data": f"approve:{callback_data}"},
+            {"text": "❌ Reject", "callback_data": f"reject:{callback_data}"},
+        ]]
+    }
+    data = {"chat_id": chat_id, "caption": caption[:1024],
+            "reply_markup": json.dumps(keyboard)}
+    with video_path.open("rb") as fh:
+        files = {"video": (video_path.name, fh, "video/mp4")}
+        resp = requests.post(url, data=data, files=files, timeout=300)
+    payload = resp.json()
+    if not payload.get("ok"):
+        raise RuntimeError(json.dumps(payload, indent=2))
+    return payload
+
+
 def _latest_output_dir() -> Path:
     output_root = config.OUTPUT_DIR
     dirs = sorted(p for p in output_root.iterdir() if p.is_dir())
@@ -74,7 +99,22 @@ def send_latest_batch(output_dir: Path):
         if item.get("line"):
             caption = f"{caption}\n\n{item['line']}"
         print(f"Sending {image_path.name}...")
-        send_photo(image_path, caption, image_path.name)
+        send_photo(image_path, caption, f"{output_dir.name}/{image_path.name}")
+
+    # Video reels (if any) — sent with the same Approve/Reject buttons.
+    captions_path = output_dir / "captions.json"
+    if captions_path.exists():
+        payload = json.loads(captions_path.read_text(encoding="utf-8"))
+        for item in payload.get("video_reels", []):
+            file_name = item.get("file")
+            if not file_name:
+                continue
+            video_path = output_dir / "reels" / file_name
+            if not video_path.exists():
+                continue
+            caption = item.get("caption") or item.get("line") or "New reel for review"
+            print(f"Sending reel {file_name}...")
+            send_video(video_path, caption, f"{output_dir.name}/reels/{file_name}")
 
 
 def main(argv=None):
@@ -93,7 +133,7 @@ def main(argv=None):
         if image_path is None or not image_path.exists():
             raise FileNotFoundError("No card images found in the latest output folder")
         print(f"Sending {image_path}...")
-        send_photo(image_path, args.caption, f"{image_path.name}")
+        send_photo(image_path, args.caption, f"{output_dir.name}/{image_path.name}")
         return
 
     if args.image:

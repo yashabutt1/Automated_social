@@ -17,3 +17,7 @@ Telegram.dmg
 *.zip
 1.jpeg
 fonts/Fraunces/
+
+# reel tooling / assets (not source)
+bin/
+music/

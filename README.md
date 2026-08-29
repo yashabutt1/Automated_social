@@ -13,6 +13,24 @@ The Love Lens generates a daily batch of quote cards and paragraph cards, writes
 - [fetch_image.py](fetch_image.py): fetches an attractive, topic-matched portrait photo from Pexels, crops it to the card size, and remembers recently-used photo IDs (`output/.pexels_history.json`) so images don't repeat. Needs `PEXELS_API_KEY`; fails soft to the gradient when absent.
 - [gen_image.py](gen_image.py): returns the background for each card — a Pexels photo when available, otherwise the original locally-drawn Pillow gradient.
 - [compose.py](compose.py): renders the final decorated cards with Pillow — background photo, a readability scrim, soft floral corner accents, an elegant script title (Snell Roundhand), and the serif body text.
+- [reel_visuals.py](reel_visuals.py): visual-variety catalogue for reels (nature / love / aesthetic categories) with rotation so the two daily reels differ and don't repeat day to day.
+- [fetch_video.py](fetch_video.py): downloads a free HD vertical stock clip from Pexels for a reel, deduped by clip ID.
+- [fetch_music.py](fetch_music.py): picks a royalty-free track from the `music/` folder, avoiding recently-used ones.
+- [compose_video.py](compose_video.py): builds the finished reel with ffmpeg — cover-cropped 9:16 clip + branded text overlay + music with fades (H.264/AAC).
+
+## Video reels
+
+Each run also builds `VIDEO_REELS_PER_RUN` (default 2) finished reels: a free
+Pexels clip + branded overlay + royalty-free music, sent to Telegram with the
+same Approve/Reject buttons. Approved reels post to the page via the Facebook
+Reels API (falling back to a normal video post if the token can't use Reels).
+
+Requirements:
+- **ffmpeg / ffprobe** — static binaries live in `bin/` (Homebrew's build was
+  broken on this machine). Replace or point `config.FFMPEG` elsewhere as needed.
+- **Music** — drop royalty-free tracks into `music/` (see `music/README.txt`).
+  Pixabay Music is recommended: free, no attribution, safe for a monetized page.
+  Empty folder → reels ship without music.
 - [run_daily_guard.sh](run_daily_guard.sh): the cron-friendly wrapper that runs the daily generation and notification flow safely. It checks output/.last_run_date, skips if the job already ran today, and only writes the marker after both generation and notification succeed.
 - [prompts.py](prompts.py): stores the text-generation prompts for lines, paragraphs, and reels.
 - [config.py](config.py): central settings for branding, model names, output size, background moods, and batch size.

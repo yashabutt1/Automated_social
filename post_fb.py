@@ -114,6 +114,68 @@ def post_card(image_path, caption):
             raise RuntimeError(f"Network error while posting to Facebook: {exc}") from exc
 
 
+def _post_video_fallback(page_id, token, video_path, caption):
+    """Plain video post (used if the Reels API is unavailable for this token)."""
+    url = f"https://graph.facebook.com/v21.0/{page_id}/videos"
+    with Path(video_path).open("rb") as fh:
+        files = {"source": (Path(video_path).name, fh, "video/mp4")}
+        data = {"description": build_caption(caption), "access_token": token}
+        resp = requests.post(url, files=files, data=data, timeout=300)
+    payload = resp.json()
+    if not resp.ok:
+        raise RuntimeError(json.dumps(payload, indent=2))
+    print("Posted as a regular video (Reels API not available for this token).")
+    return {"id": payload.get("id"), "as": "video"}
+
+
+def post_reel(video_path, caption):
+    """Publish a vertical MP4 as a Facebook Reel via the resumable Reels API.
+
+    Falls back to a normal video post if the Reels endpoint rejects the token.
+    """
+    video_path = Path(video_path)
+    if not video_path.exists():
+        raise FileNotFoundError(video_path)
+    page_id = _env("FB_PAGE_ID")
+    token = _resolve_page_access_token(page_id)
+    base = "https://graph.facebook.com/v21.0"
+
+    try:
+        # 1) start an upload session
+        start = requests.post(f"{base}/{page_id}/video_reels",
+                              data={"upload_phase": "start", "access_token": token}, timeout=60)
+        sj = start.json()
+        if not start.ok or "video_id" not in sj or "upload_url" not in sj:
+            raise RuntimeError(json.dumps(sj, indent=2))
+        video_id, upload_url = sj["video_id"], sj["upload_url"]
+
+        # 2) upload the binary
+        size = video_path.stat().st_size
+        with video_path.open("rb") as fh:
+            up = requests.post(upload_url,
+                               headers={"Authorization": f"OAuth {token}",
+                                        "offset": "0", "file_size": str(size)},
+                               data=fh, timeout=600)
+        uj = up.json() if up.content else {}
+        if not up.ok or not uj.get("success", True):
+            raise RuntimeError(f"upload failed: {up.status_code} {up.text[:400]}")
+
+        # 3) publish
+        fin = requests.post(f"{base}/{page_id}/video_reels",
+                            data={"upload_phase": "finish", "video_id": video_id,
+                                  "video_state": "PUBLISHED",
+                                  "description": build_caption(caption),
+                                  "access_token": token}, timeout=120)
+        fj = fin.json()
+        if not fin.ok or not fj.get("success", False):
+            raise RuntimeError(json.dumps(fj, indent=2))
+        print(f"Published reel {video_id}")
+        return {"id": video_id, "as": "reel"}
+    except Exception as exc:
+        print(f"Reels API failed ({exc}); falling back to a normal video post.")
+        return _post_video_fallback(page_id, token, video_path, caption)
+
+
 def _latest_output_dir() -> Path:
     output_root = config.OUTPUT_DIR
     dirs = sorted(p for p in output_root.iterdir() if p.is_dir())

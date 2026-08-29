@@ -32,6 +32,24 @@ DECORATE_FLORALS = True
 CARDS_PER_RUN = 3      # short quote cards (text on photo background)
 PARAGRAPH_CARDS_PER_RUN = 3  # longer micro-essay cards
 REELS_PER_RUN = 1      # reel scripts (text output only, you film/animate)
+VIDEO_REELS_PER_RUN = 2  # finished video reels (stock clip + text + music)
+
+# ---------------------------------------------------------------------------
+# Video reels
+# ---------------------------------------------------------------------------
+REEL_W = 1080
+REEL_H = 1920          # 9:16 vertical for Reels
+REEL_TARGET_SECONDS = 14   # final reel length (clip is looped/trimmed to fit)
+
+# Static ffmpeg/ffprobe binaries live in ./bin (installed there because the
+# Homebrew build was broken on this machine). Falls back to PATH if absent.
+_BIN = Path(__file__).parent / "bin"
+FFMPEG = str(_BIN / "ffmpeg") if (_BIN / "ffmpeg").exists() else "ffmpeg"
+FFPROBE = str(_BIN / "ffprobe") if (_BIN / "ffprobe").exists() else "ffprobe"
+
+# Royalty-free music pool. Drop .mp3/.m4a/.wav files here; reels rotate through
+# them and avoid recently-used tracks. Empty folder -> reels ship without music.
+MUSIC_DIR = Path(__file__).parent / "music"
 
 # ---------------------------------------------------------------------------
 # Card output size  (Instagram / Facebook feed)

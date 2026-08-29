@@ -79,18 +79,25 @@ def _edit_message(chat_id, message_id, text):
     requests.post(url, data={"chat_id": chat_id, "message_id": message_id, "text": text}, timeout=30)
 
 
-def _move_to_rejected(filename: str):
-    src = _latest_output_dir() / "cards" / filename
-    if src.exists():
-        target = REJECTED_DIR / filename
-        src.rename(target)
+def _move_to_rejected(media_path: Path):
+    if media_path.exists():
+        target = REJECTED_DIR / media_path.name
+        media_path.rename(target)
         return str(target)
     return None
 
 
-def _posted_marker(latest: Path, filename: str) -> Path:
-    marker_name = f"{latest.name}_{filename}"
+def _posted_marker(batch_dir: Path, filename: str) -> Path:
+    marker_name = f"{batch_dir.name}_{Path(filename).name}"
     return POSTED_DIR / marker_name
+
+
+def _resolve_batch_dir(date_part: str) -> Path:
+    candidate = ROOT / "output" / date_part
+    if date_part and candidate.is_dir():
+        return candidate
+    # Legacy callback_data with no date segment (messages sent before this fix).
+    return _latest_output_dir()
 
 
 def process_update(update):
@@ -103,53 +110,90 @@ def process_update(update):
     message_id = callback.get("message", {}).get("message_id")
     if not data.startswith(("approve:", "reject:")):
         return
-    action, filename = data.split(":", 1)
-    latest = _latest_output_dir()
-    image_path = latest / "cards" / filename
-    posted_marker = _posted_marker(latest, filename)
+    action, payload = data.split(":", 1)
+    if "/" in payload:
+        date_part, rel = payload.split("/", 1)
+    else:
+        date_part, rel = "", payload
+    batch_dir = _resolve_batch_dir(date_part)
+
+    base_name = Path(rel).name
+    is_reel = base_name.lower().endswith(".mp4")
+    # cards come through as a bare filename (legacy) -> live under cards/
+    media_path = batch_dir / rel if "/" in rel else batch_dir / "cards" / rel
+    posted_marker = _posted_marker(batch_dir, base_name)
 
     if action == "approve":
         if posted_marker.exists():
             _answer_callback(query_id, "Already posted")
-            _edit_message(chat_id, message_id, f"Already posted {filename}")
-            _log(f"Already posted {filename}, skipped")
+            _edit_message(chat_id, message_id, f"Already posted {base_name}")
+            _log(f"Already posted {base_name}, skipped")
             return
-        if not image_path.exists():
-            _answer_callback(query_id, "Image not found")
-            _log(f"Approve failed: {filename} missing")
+        if not media_path.exists():
+            _answer_callback(query_id, "File not found")
+            _log(f"Approve failed: {media_path} missing")
             return
         try:
             caption = ""
-            captions_path = latest / "captions.json"
+            captions_path = batch_dir / "captions.json"
             if captions_path.exists():
-                payload = json.loads(captions_path.read_text(encoding="utf-8"))
-                for item in payload.get("cards", []):
-                    if item.get("file") == filename:
+                captions_data = json.loads(captions_path.read_text(encoding="utf-8"))
+                section = "video_reels" if is_reel else "cards"
+                for item in captions_data.get(section, []):
+                    if item.get("file") == base_name:
                         caption = item.get("caption", "").strip()
                         break
-            result = post_fb.post_card(str(image_path), caption)
+            if is_reel:
+                result = post_fb.post_reel(str(media_path), caption)
+            else:
+                result = post_fb.post_card(str(media_path), caption)
             try:
                 posted_marker.write_text("posted", encoding="utf-8")
             except Exception as write_exc:
-                _log(f"Warning: could not write posted marker for {filename}: {write_exc}")
+                _log(f"Warning: could not write posted marker for {base_name}: {write_exc}")
             post_id = result.get("id")
             page_id = os.getenv("FB_PAGE_ID", "").strip()
             link = f"https://www.facebook.com/{page_id}/posts/{post_id}" if page_id and post_id else str(post_id or "")
+            kind = "reel" if is_reel else "card"
             _answer_callback(query_id, "Posted ✅")
             _edit_message(chat_id, message_id, f"Posted ✅ {link}")
-            _log(f"Approved and posted {filename} -> {link}")
+            _log(f"Approved and posted {kind} {base_name} -> {link}")
         except Exception as exc:
             _answer_callback(query_id, f"Failed: {exc}")
-            _log(f"Approve failed for {filename}: {exc}")
+            _log(f"Approve failed for {base_name}: {exc}")
     else:
-        moved = _move_to_rejected(filename)
+        moved = _move_to_rejected(media_path)
         _answer_callback(query_id, "Skipped")
-        _edit_message(chat_id, message_id, f"Skipped {filename}")
-        _log(f"Rejected {filename} -> {moved}")
+        _edit_message(chat_id, message_id, f"Skipped {base_name}")
+        _log(f"Rejected {base_name} -> {moved}")
+
+
+def _reconcile_offset(saved_offset: int) -> int:
+    """Don't blindly trust the persisted offset on startup. If it's ahead of
+    everything Telegram still has pending, a prior run bumped it past updates
+    it never actually processed (crash, bad write, restart mid-poll) — new
+    button taps would silently never be returned by getUpdates again."""
+    try:
+        pending = _get_updates(0)
+    except requests.exceptions.RequestException as exc:
+        _log(f"startup reconcile: could not fetch pending updates ({exc}); trusting saved offset {saved_offset}")
+        return saved_offset
+    if not pending:
+        return saved_offset
+    highest_pending_plus_one = max(u.get("update_id", 0) for u in pending) + 1
+    if saved_offset > highest_pending_plus_one:
+        _log(
+            f"startup reconcile: saved offset {saved_offset} is ahead of "
+            f"highest pending update ({highest_pending_plus_one}); discarding stale offset"
+        )
+        return 0
+    return saved_offset
 
 
 def main():
-    offset = _load_offset()
+    offset = _reconcile_offset(_load_offset())
+    _save_offset(offset)
+    _log(f"approve_bot starting, offset={offset}")
     while True:
         try:
             updates = _get_updates(offset)
