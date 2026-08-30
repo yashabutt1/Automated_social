@@ -34,7 +34,7 @@ PARAGRAPH_CARDS_PER_RUN = 3  # longer micro-essay cards
 REELS_PER_RUN = 1      # reel scripts (text output only, you film/animate)
 VIDEO_REELS_PER_RUN = 2  # finished video reels (stock clip + text + music)
 PRODUCT_POSTS_PER_RUN = 3  # Amazon affiliate product recommendations per day
-ENGAGEMENT_POSTS_PER_RUN = 2  # interactive "comment below" question/fact posts
+ENGAGEMENT_POSTS_PER_RUN = 3  # interactive "comment below" question/fact posts
 
 # ---------------------------------------------------------------------------
 # Amazon Associates (manual-link mode — no PA-API)
