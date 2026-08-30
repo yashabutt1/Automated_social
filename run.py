@@ -214,7 +214,6 @@ def build_product_posts():
     print(f"· writing {len(products)} product caption(s)…")
     captions = gen_text.make_product_captions(products)
 
-    disclosure = config.AFFILIATE_DISCLOSURE
     posts = []
     for p, cap in zip(products, captions):
         text = (cap.get("caption") or "").strip() or gen_text._fallback_product_caption(p["name"])
@@ -225,9 +224,9 @@ def build_product_posts():
             "url": url,
             "caption": text,
             # what Telegram shows (link inline so it previews + is tappable)
-            "tg_text": f"{text}\n\n{url}\n\n{disclosure}",
+            "tg_text": f"{text}\n\n{url}",
             # what gets posted to Facebook (link passed separately as the card)
-            "fb_message": f"{text}\n\n{disclosure}",
+            "fb_message": text,
         })
         print(f"    + {p['name'][:45]} -> {url}")
     return posts
