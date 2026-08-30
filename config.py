@@ -33,6 +33,18 @@ CARDS_PER_RUN = 3      # short quote cards (text on photo background)
 PARAGRAPH_CARDS_PER_RUN = 3  # longer micro-essay cards
 REELS_PER_RUN = 1      # reel scripts (text output only, you film/animate)
 VIDEO_REELS_PER_RUN = 2  # finished video reels (stock clip + text + music)
+PRODUCT_POSTS_PER_RUN = 2  # Amazon affiliate product recommendations per day
+
+# ---------------------------------------------------------------------------
+# Amazon Associates (manual-link mode — no PA-API)
+# ---------------------------------------------------------------------------
+import os as _os
+AMAZON_ASSOC_TAG = _os.getenv("AMAZON_ASSOC_TAG", "").strip()
+AMAZON_MARKETPLACE = _os.getenv("AMAZON_MARKETPLACE", "www.amazon.com").strip()
+# You curate products here (name | url per line). See products.example.txt.
+PRODUCTS_FILE = Path(__file__).parent / "products.txt"
+AFFILIATE_DISCLOSURE = (
+    "As an Amazon Associate, The Love Lens earns from qualifying purchases.")
 
 # ---------------------------------------------------------------------------
 # Video reels

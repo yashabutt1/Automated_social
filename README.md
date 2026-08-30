@@ -18,6 +18,22 @@ The Love Lens generates a daily batch of quote cards and paragraph cards, writes
 - [fetch_music.py](fetch_music.py): picks a royalty-free track from the `music/` folder, avoiding recently-used ones.
 - [compose_video.py](compose_video.py): builds the finished reel with ffmpeg — cover-cropped 9:16 clip + branded text overlay + music with fades (H.264/AAC).
 
+## Amazon affiliate product posts
+
+Each run also picks `PRODUCT_POSTS_PER_RUN` (default 2) products from your curated
+pool, writes a persuasive gift-angle caption + the required Associates disclosure,
+and sends them to Telegram for approval. Approved ones post to the page as link
+posts (Facebook renders the product card).
+
+- **No PA-API required.** Curate best-seller links yourself in `products.txt`
+  (one `Name | URL` per line — see `products.example.txt`). No Amazon scraping.
+- Your Associate tag is read from `AMAZON_ASSOC_TAG` in `.env` and forced onto
+  every link (even if the pasted link carried someone else's tag).
+- Products are deduped by ASIN so the same item isn't reposted until the others
+  have been used. Add more links anytime; refill when the pool runs low.
+- [fetch_products.py](fetch_products.py) parses the pool and builds links;
+  [post_fb.py](post_fb.py) `post_link()` publishes the feed post.
+
 ## Video reels
 
 Each run also builds `VIDEO_REELS_PER_RUN` (default 2) finished reels: a free

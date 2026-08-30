@@ -21,3 +21,6 @@ fonts/Fraunces/
 # reel tooling / assets (not source)
 bin/
 music/
+
+# Amazon product pool (your curated links)
+products.txt

@@ -43,6 +43,25 @@ def send_photo(image_path, caption, callback_data):
     return payload
 
 
+def send_message(text, callback_data):
+    token = _env("TELEGRAM_BOT_TOKEN")
+    chat_id = _env("TELEGRAM_CHAT_ID")
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    keyboard = {
+        "inline_keyboard": [[
+            {"text": "✅ Approve", "callback_data": f"approve:{callback_data}"},
+            {"text": "❌ Reject", "callback_data": f"reject:{callback_data}"},
+        ]]
+    }
+    data = {"chat_id": chat_id, "text": text[:4000],
+            "reply_markup": json.dumps(keyboard)}
+    resp = requests.post(url, data=data, timeout=60)
+    payload = resp.json()
+    if not payload.get("ok"):
+        raise RuntimeError(json.dumps(payload, indent=2))
+    return payload
+
+
 def send_video(video_path, caption, callback_data):
     video_path = Path(video_path)
     if not video_path.exists():
@@ -115,6 +134,14 @@ def send_latest_batch(output_dir: Path):
             caption = item.get("caption") or item.get("line") or "New reel for review"
             print(f"Sending reel {file_name}...")
             send_video(video_path, caption, f"{output_dir.name}/reels/{file_name}")
+
+        # Amazon affiliate product posts (link posts, no media file).
+        for item in payload.get("products", []):
+            asin = item.get("asin") or item.get("url", "")[-12:]
+            text = item.get("tg_text") or item.get("caption") or "New product for review"
+            print(f"Sending product {item.get('name','')[:40]}...")
+            send_message(f"🛒 PRODUCT POST\n\n{text}",
+                         f"{output_dir.name}/products/{asin}")
 
 
 def main(argv=None):

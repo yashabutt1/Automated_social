@@ -186,15 +186,51 @@ def generate_batch(offset_days: int = 0):
     # ---- video reels: stock clip + branded text + music -------------------
     video_reels = build_video_reels(day_dir, reel_topics, used_content)
 
+    # ---- Amazon affiliate product recommendations -------------------------
+    products = build_product_posts()
+
     print("· writing reel scripts…")
     reels = gen_text.make_reels(config.REELS_PER_RUN)
 
     (day_dir / "captions.json").write_text(
-        json.dumps({"cards": cards, "reels": reels, "video_reels": video_reels}, indent=2),
+        json.dumps({"cards": cards, "reels": reels, "video_reels": video_reels,
+                    "products": products}, indent=2),
         encoding="utf-8")
     build_review_html(day_dir, cards, reels)
 
     return day_dir
+
+
+def build_product_posts():
+    if config.PRODUCT_POSTS_PER_RUN < 1:
+        return []
+    import gen_text
+    import fetch_products
+
+    products = fetch_products.pick_products(config.PRODUCT_POSTS_PER_RUN)
+    if not products:
+        print("· no products in products.txt yet; skipping product posts")
+        return []
+    print(f"· writing {len(products)} product caption(s)…")
+    captions = gen_text.make_product_captions(products)
+
+    disclosure = config.AFFILIATE_DISCLOSURE
+    posts = []
+    for p, cap in zip(products, captions):
+        text = (cap.get("caption") or "").strip() or gen_text._fallback_product_caption(p["name"])
+        url = p["affiliate_url"]
+        posts.append({
+            "name": p["name"],
+            "asin": p.get("asin"),
+            "url": url,
+            "caption": text,
+            # what Telegram shows (link inline so it previews + is tappable)
+            "tg_text": f"{text}\n\n{url}\n\n{disclosure}",
+            # what gets posted to Facebook (link passed separately as the card)
+            "fb_message": f"{text}\n\n{disclosure}",
+        })
+        print(f"    + {p['name'][:45]} -> {url}")
+    return posts
 
 
 def _reel_caption(item, topic, music_credit=None):

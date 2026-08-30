@@ -118,54 +118,76 @@ def process_update(update):
     batch_dir = _resolve_batch_dir(date_part)
 
     base_name = Path(rel).name
-    is_reel = base_name.lower().endswith(".mp4")
+    is_product = rel.startswith("products/")
+    is_reel = (not is_product) and base_name.lower().endswith(".mp4")
     # cards come through as a bare filename (legacy) -> live under cards/
     media_path = batch_dir / rel if "/" in rel else batch_dir / "cards" / rel
     posted_marker = _posted_marker(batch_dir, base_name)
+    captions_path = batch_dir / "captions.json"
 
-    if action == "approve":
-        if posted_marker.exists():
-            _answer_callback(query_id, "Already posted")
-            _edit_message(chat_id, message_id, f"Already posted {base_name}")
-            _log(f"Already posted {base_name}, skipped")
-            return
-        if not media_path.exists():
-            _answer_callback(query_id, "File not found")
-            _log(f"Approve failed: {media_path} missing")
-            return
-        try:
-            caption = ""
-            captions_path = batch_dir / "captions.json"
-            if captions_path.exists():
-                captions_data = json.loads(captions_path.read_text(encoding="utf-8"))
-                section = "video_reels" if is_reel else "cards"
-                for item in captions_data.get(section, []):
-                    if item.get("file") == base_name:
-                        caption = item.get("caption", "").strip()
-                        break
-            if is_reel:
-                result = post_fb.post_reel(str(media_path), caption)
-            else:
-                result = post_fb.post_card(str(media_path), caption)
-            try:
-                posted_marker.write_text("posted", encoding="utf-8")
-            except Exception as write_exc:
-                _log(f"Warning: could not write posted marker for {base_name}: {write_exc}")
-            post_id = result.get("id")
-            page_id = os.getenv("FB_PAGE_ID", "").strip()
-            link = f"https://www.facebook.com/{page_id}/posts/{post_id}" if page_id and post_id else str(post_id or "")
-            kind = "reel" if is_reel else "card"
-            _answer_callback(query_id, "Posted ✅")
-            _edit_message(chat_id, message_id, f"Posted ✅ {link}")
-            _log(f"Approved and posted {kind} {base_name} -> {link}")
-        except Exception as exc:
-            _answer_callback(query_id, f"Failed: {exc}")
-            _log(f"Approve failed for {base_name}: {exc}")
-    else:
-        moved = _move_to_rejected(media_path)
+    if action != "approve":
+        if not is_product:
+            moved = _move_to_rejected(media_path)
+            _log(f"Rejected {base_name} -> {moved}")
+        else:
+            _log(f"Rejected product {base_name}")
         _answer_callback(query_id, "Skipped")
         _edit_message(chat_id, message_id, f"Skipped {base_name}")
-        _log(f"Rejected {base_name} -> {moved}")
+        return
+
+    if posted_marker.exists():
+        _answer_callback(query_id, "Already posted")
+        _edit_message(chat_id, message_id, f"Already posted {base_name}")
+        _log(f"Already posted {base_name}, skipped")
+        return
+    if not is_product and not media_path.exists():
+        _answer_callback(query_id, "File not found")
+        _log(f"Approve failed: {media_path} missing")
+        return
+
+    try:
+        captions_data = {}
+        if captions_path.exists():
+            captions_data = json.loads(captions_path.read_text(encoding="utf-8"))
+
+        if is_product:
+            post = next((p for p in captions_data.get("products", [])
+                         if (p.get("asin") or "") == base_name
+                         or p.get("url", "").endswith(base_name)), None)
+            if not post:
+                _answer_callback(query_id, "Product not found")
+                _log(f"Approve failed: product {base_name} not in captions.json")
+                return
+            result = post_fb.post_link(post.get("fb_message", post.get("caption", "")),
+                                       post["url"])
+            kind = "product"
+        else:
+            section = "video_reels" if is_reel else "cards"
+            caption = ""
+            for item in captions_data.get(section, []):
+                if item.get("file") == base_name:
+                    caption = item.get("caption", "").strip()
+                    break
+            if is_reel:
+                result = post_fb.post_reel(str(media_path), caption)
+                kind = "reel"
+            else:
+                result = post_fb.post_card(str(media_path), caption)
+                kind = "card"
+
+        try:
+            posted_marker.write_text("posted", encoding="utf-8")
+        except Exception as write_exc:
+            _log(f"Warning: could not write posted marker for {base_name}: {write_exc}")
+        post_id = result.get("id")
+        page_id = os.getenv("FB_PAGE_ID", "").strip()
+        link = f"https://www.facebook.com/{page_id}/posts/{post_id}" if page_id and post_id else str(post_id or "")
+        _answer_callback(query_id, "Posted ✅")
+        _edit_message(chat_id, message_id, f"Posted ✅ {link}")
+        _log(f"Approved and posted {kind} {base_name} -> {link}")
+    except Exception as exc:
+        _answer_callback(query_id, f"Failed: {exc}")
+        _log(f"Approve failed for {base_name}: {exc}")
 
 
 def _reconcile_offset(saved_offset: int) -> int:

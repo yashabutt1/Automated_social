@@ -1,0 +1,18 @@
+# The Love Lens — Amazon product pool
+# ------------------------------------
+# Put ONE product per line, in the form:
+#
+#     Short product name / gift angle | https://www.amazon.com/dp/ASIN...
+#
+# - Lines starting with # are ignored. Blank lines are ignored.
+# - Paste the normal Amazon product URL (or a SiteStripe link). The pipeline
+#   makes sure YOUR Associate tag (ynb0ec-20) is on every link automatically.
+# - The "name" is what the AI uses to write the persuasive caption, so make it
+#   descriptive (what it is + who it's for). Don't invent specs.
+# - Add as many as you like; the pipeline rotates them and won't repeat a
+#   product until the others have been used.
+#
+# Examples (replace the URLs with real best-seller links you pick):
+Cozy self-care gift box for her — blanket, candle & socks | https://www.amazon.com/dp/EXAMPLE1
+Couples conversation card game — 150 questions for date night | https://www.amazon.com/dp/EXAMPLE2
+Long-distance touch bracelets for couples | https://www.amazon.com/dp/EXAMPLE3

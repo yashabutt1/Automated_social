@@ -228,6 +228,31 @@ def make_paragraphs(topics: list[dict]):
         return _fallback_paragraphs(topics)
 
 
+def _fallback_product_caption(name: str) -> str:
+    return (f"Someone just came to mind, didn't they? 💛 {name} — the kind of "
+            f"little 'I'm thinking of you' gift that makes their whole day softer. "
+            f"Send it here 👉")
+
+
+def make_product_captions(products: list[dict]):
+    """One batched Gemini call -> a persuasive caption per product (by name)."""
+    if not products:
+        return []
+    names = [p.get("name", "") for p in products]
+    if _client is None:
+        return [{"caption": _fallback_product_caption(n)} for n in names]
+    try:
+        resp = _client.models.generate_content(
+            model=config.TEXT_MODEL, contents=prompts.product_prompt(names))
+        items = _parse_json(resp.text)
+        if not isinstance(items, list) or len(items) < len(names):
+            raise ValueError("short/invalid product caption response")
+        return items[: len(names)]
+    except Exception as exc:
+        print(f"  Gemini product caption failed ({exc}); using local fallback")
+        return [{"caption": _fallback_product_caption(n)} for n in names]
+
+
 def make_reels(n: int):
     """Return a list of reel-script dicts."""
     if _client is None:

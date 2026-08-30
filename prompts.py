@@ -73,6 +73,30 @@ no markdown, no backticks:
 Give 6 to 9 hashtags each, mixing broad and niche, relevant to that item's topic."""
 
 
+def product_prompt(names: list[str]) -> str:
+    """Persuasive gift-angle captions for a list of Amazon products."""
+    n = len(names)
+    listing = "\n".join(f"{i}. {name}" for i, name in enumerate(names, 1))
+    return f"""You write short, warm, irresistible product captions for a love &
+relationships page whose audience buys thoughtful gifts for the people they love.
+
+Products (write exactly one caption for EACH, in this order):
+{listing}
+
+For each caption:
+- Open with a warm, relatable hook, then make the reader picture gifting it to
+  someone they care about (partner, friend, mom, someone going through a hard time).
+- Make it tempting and emotional so they want to buy it right now — but do NOT
+  invent specific specs, prices, claims, or reviews you weren't given. Stay true
+  to the product name/angle provided.
+- 2-4 short sentences. Warm, human, a little playful. Use 1-3 tasteful emojis.
+- End with a soft nudge to tap the link (e.g. "Send it here 👉" / "Grab it here 👉").
+- Do NOT include the URL or hashtags in the caption text.
+
+Respond with ONLY a JSON array of exactly {n} objects, in order, no markdown:
+[{{"caption": "..."}}]"""
+
+
 def reels_prompt(n: int, formats: list[str]) -> str:
     """Prompt for N reel scripts across the given formats."""
     fmt_list = "\n".join(f"- {f}" for f in formats[:n])

@@ -176,6 +176,19 @@ def post_reel(video_path, caption):
         return _post_video_fallback(page_id, token, video_path, caption)
 
 
+def post_link(message, link):
+    """Publish a link post to the Page feed (Facebook renders the link preview)."""
+    page_id = _env("FB_PAGE_ID")
+    token = _resolve_page_access_token(page_id)
+    url = f"https://graph.facebook.com/v21.0/{page_id}/feed"
+    data = {"message": message, "link": link, "access_token": token}
+    resp = requests.post(url, data=data, timeout=60)
+    payload = resp.json()
+    if not resp.ok:
+        raise RuntimeError(json.dumps(payload, indent=2))
+    return {"id": payload.get("id")}
+
+
 def _latest_output_dir() -> Path:
     output_root = config.OUTPUT_DIR
     dirs = sorted(p for p in output_root.iterdir() if p.is_dir())
