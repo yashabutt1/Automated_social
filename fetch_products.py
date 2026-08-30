@@ -10,12 +10,16 @@ the Associates Operating Agreement (it's your own tag).
 """
 from __future__ import annotations
 
+import csv
+import io
 import json
 import os
 import random
 import re
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+
+import requests
 
 import config
 
@@ -54,8 +58,7 @@ def build_affiliate_url(url: str) -> str:
     return urlunparse(parts._replace(query=urlencode(query)))
 
 
-def load_products() -> list[dict]:
-    """Parse products.txt into [{name, url, asin}] entries."""
+def _load_from_file() -> list[dict]:
     path = config.PRODUCTS_FILE
     if not path.exists():
         return []
@@ -69,6 +72,49 @@ def load_products() -> list[dict]:
             continue
         items.append({"name": name, "url": url, "asin": extract_asin(url)})
     return items
+
+
+def _load_from_sheet() -> list[dict]:
+    """Read a published-to-web Google Sheet (CSV): columns Name | Amazon URL."""
+    url = os.getenv("GOOGLE_SHEET_CSV_URL", "").strip() or config.GOOGLE_SHEET_CSV_URL
+    if not url:
+        return []
+    try:
+        resp = requests.get(url, timeout=20)
+        resp.raise_for_status()
+        rows = list(csv.reader(io.StringIO(resp.text)))
+    except Exception as exc:
+        print(f"  Google Sheet fetch failed ({exc}); using local products only")
+        return []
+    items = []
+    for row in rows:
+        if not row:
+            continue
+        if len(row) >= 2:
+            name, link = row[0].strip(), row[1].strip()
+        elif "|" in row[0]:
+            name, link = (p.strip() for p in row[0].split("|", 1))
+        else:
+            continue
+        if not name or not link or "amazon" not in link.lower() and "/dp/" not in link:
+            continue
+        if name.lower() in ("name", "product", "title") or "EXAMPLE" in link:
+            continue  # header row / placeholder
+        items.append({"name": name, "url": link, "asin": extract_asin(link)})
+    return items
+
+
+def load_products() -> list[dict]:
+    """Merge products from products.txt and the optional Google Sheet, deduped."""
+    combined = _load_from_file() + _load_from_sheet()
+    seen, unique = set(), []
+    for it in combined:
+        key = it.get("asin") or it.get("url")
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(it)
+    return unique
 
 
 def _history_path() -> Path:

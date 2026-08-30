@@ -43,6 +43,9 @@ AMAZON_ASSOC_TAG = _os.getenv("AMAZON_ASSOC_TAG", "").strip()
 AMAZON_MARKETPLACE = _os.getenv("AMAZON_MARKETPLACE", "www.amazon.com").strip()
 # You curate products here (name | url per line). See products.example.txt.
 PRODUCTS_FILE = Path(__file__).parent / "products.txt"
+# Optional: a published-to-web Google Sheet (CSV) so links can be added from any
+# device. Columns: Name | Amazon URL. Merged with products.txt.
+GOOGLE_SHEET_CSV_URL = _os.getenv("GOOGLE_SHEET_CSV_URL", "").strip()
 AFFILIATE_DISCLOSURE = (
     "As an Amazon Associate, The Love Lens earns from qualifying purchases.")
 
