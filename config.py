@@ -34,6 +34,7 @@ PARAGRAPH_CARDS_PER_RUN = 3  # longer micro-essay cards
 REELS_PER_RUN = 1      # reel scripts (text output only, you film/animate)
 VIDEO_REELS_PER_RUN = 2  # finished video reels (stock clip + text + music)
 PRODUCT_POSTS_PER_RUN = 3  # Amazon affiliate product recommendations per day
+ENGAGEMENT_POSTS_PER_RUN = 2  # interactive "comment below" question/fact posts
 
 # ---------------------------------------------------------------------------
 # Amazon Associates (manual-link mode — no PA-API)
@@ -121,6 +122,16 @@ STYLE_SUFFIX = (
 # ---------------------------------------------------------------------------
 # Rotating reel-script formats (matches your starter kit)
 # ---------------------------------------------------------------------------
+ENGAGEMENT_FORMATS = [
+    "A question about relationship truths (e.g. 'What's one relationship truth you wish you knew sooner?')",
+    "Fill-in-the-blank (e.g. 'Real love feels like ______.')",
+    "This or that (make them pick a side and defend it)",
+    "Would you rather (two tempting relationship options)",
+    "Finish the sentence (e.g. 'I feel most loved when...')",
+    "A surprising TRUE fun fact about love/attraction/history + a question that invites reactions",
+    "A gentle hot-take / unpopular opinion that invites agree-or-disagree",
+]
+
 REEL_FORMATS = [
     "Green flag / Red flag — two quick contrasts on one behavior",
     "What they say vs. what they mean",

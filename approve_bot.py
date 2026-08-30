@@ -167,9 +167,13 @@ def process_update(update):
             except Exception as mp_exc:
                 _log(f"Warning: could not mark product posted: {mp_exc}")
         else:
-            section = "video_reels" if is_reel else "cards"
+            if is_reel:
+                lookup = captions_data.get("video_reels", [])
+            else:
+                # quote/paragraph cards and engagement cards both post as photos
+                lookup = captions_data.get("cards", []) + captions_data.get("engagement", [])
             caption = ""
-            for item in captions_data.get(section, []):
+            for item in lookup:
                 if item.get("file") == base_name:
                     caption = item.get("caption", "").strip()
                     break

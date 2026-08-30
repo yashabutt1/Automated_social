@@ -50,6 +50,15 @@ def load_used_content(output_root: Path | str) -> set[str]:
                 value = item.get(key)
                 if value:
                     used.add(_normalize_text(value))
+        # Also remember engagement prompts and reel lines so nothing repeats.
+        for item in payload.get("engagement", []):
+            value = item.get("prompt")
+            if value:
+                used.add(_normalize_text(value))
+        for item in payload.get("video_reels", []):
+            value = item.get("line")
+            if value:
+                used.add(_normalize_text(value))
     return used
 
 

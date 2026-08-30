@@ -73,6 +73,32 @@ no markdown, no backticks:
 Give 6 to 9 hashtags each, mixing broad and niche, relevant to that item's topic."""
 
 
+def engagement_prompt(n: int, formats: list[str]) -> str:
+    """Interactive posts designed to pull comments."""
+    fmt_list = "\n".join(f"- {f}" for f in formats)
+    return f"""{RULES}
+Write {n} highly engaging, comment-baiting posts for a love & relationships page.
+The whole point is to make people STOP and reply. Rotate across these formats
+(use a different one for each of the {n} items):
+{fmt_list}
+
+For each post:
+- "prompt": the short, punchy text that goes ON the card (max ~14 words for
+  questions; for a fun-fact use 1-2 short sentences with the surprising fact).
+  Make it irresistible to answer or react to. No hashtags on the card.
+- "title": a 1-3 word script-font header, e.g. "Your Turn", "Tell Me",
+  "Real Talk", "Did You Know", "This or That", "Finish This".
+- "caption": the Facebook caption — restate/expand the hook and EXPLICITLY invite
+  a comment (e.g. "👇 Drop your answer below — I read every one."). Warm, human.
+- "hashtags": 6-9, broad + niche.
+
+Fun-fact items must be TRUE and about love/attraction/relationships psychology or
+history — no made-up statistics. If unsure, choose a safe, well-known fact.
+
+Respond with ONLY a JSON array of exactly {n} objects, no markdown:
+[{{"title":"...","prompt":"...","caption":"...","hashtags":["...","..."]}}]"""
+
+
 def product_prompt(names: list[str]) -> str:
     """Persuasive gift-angle captions for a list of Amazon products."""
     n = len(names)

@@ -128,10 +128,24 @@ def send_latest_batch(output_dir: Path):
         print(f"Sending {image_path.name}...")
         send_photo(image_path, caption, f"{output_dir.name}/{image_path.name}")
 
-    # Video reels (if any) — sent with the same Approve/Reject buttons.
     captions_path = output_dir / "captions.json"
     if captions_path.exists():
         payload = json.loads(captions_path.read_text(encoding="utf-8"))
+
+        # Interactive engagement cards (images in cards/) — same buttons.
+        for item in payload.get("engagement", []):
+            file_name = item.get("file")
+            if not file_name:
+                continue
+            image_path = output_dir / "cards" / file_name
+            if not image_path.exists():
+                continue
+            caption = item.get("caption") or item.get("prompt") or "New engagement post"
+            print(f"Sending engagement {file_name}...")
+            send_photo(image_path, f"💬 ENGAGEMENT POST\n\n{caption}",
+                       f"{output_dir.name}/{file_name}")
+
+        # Video reels (if any) — sent with the same Approve/Reject buttons.
         for item in payload.get("video_reels", []):
             file_name = item.get("file")
             if not file_name:

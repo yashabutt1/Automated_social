@@ -253,6 +253,59 @@ def make_product_captions(products: list[dict]):
         return [{"caption": _fallback_product_caption(n)} for n in names]
 
 
+_FALLBACK_ENGAGEMENT = [
+    {"title": "Your Turn", "prompt": "What's one relationship truth you wish you knew sooner?",
+     "caption": "We all learn a few of these the hard way. 💭 What's one relationship truth you wish you knew sooner? 👇 Drop it below — someone here needs to read it today.",
+     "hashtags": ["relationships", "datingadvice", "relationshiptruths", "love", "growth", "selflove"]},
+    {"title": "Fill In", "prompt": "Real love feels like ______.",
+     "caption": "Finish the sentence: real love feels like ______. 👇 I'll go first in the comments.",
+     "hashtags": ["love", "relationships", "realtalk", "couplegoals", "romance", "feelings"]},
+    {"title": "This or That", "prompt": "Deep 2am talks or lazy Sunday silence?",
+     "caption": "Be honest 👀 Deep 2am talks or lazy Sunday silence together? 👇 Pick one and tell me why.",
+     "hashtags": ["thisorthat", "couples", "relationships", "love", "datenight", "connection"]},
+    {"title": "Tell Me", "prompt": "I feel most loved when...",
+     "caption": "Finish this: I feel most loved when... 👇 Your answer might be exactly what someone needs to hear.",
+     "hashtags": ["love", "relationships", "lovelanguages", "selflove", "connection", "romance"]},
+    {"title": "Would You", "prompt": "Would you rather feel deeply understood or endlessly adored?",
+     "caption": "Tough one 👀 Would you rather feel deeply understood or endlessly adored? 👇 There's no wrong answer — but tell me yours.",
+     "hashtags": ["wouldyourather", "relationships", "love", "connection", "datingadvice", "selfworth"]},
+    {"title": "Did You Know", "prompt": "Falling in love can trigger the same brain regions as a runner's high.",
+     "caption": "Did you know? Early love lights up the brain's reward system — dopamine, just like a runner's high. 🧠❤️ 👇 Does new love feel like that for you?",
+     "hashtags": ["funfact", "love", "psychology", "attraction", "relationships", "science"]},
+    {"title": "Real Talk", "prompt": "A boring text back beats an exciting maybe. Agree?",
+     "caption": "Hot take: a steady, 'boring' text back beats an exciting maybe every time. 🔥 Agree or disagree? 👇 Defend your answer.",
+     "hashtags": ["hottake", "datingadvice", "relationships", "boundaries", "selfrespect", "realtalk"]},
+    {"title": "Your Turn", "prompt": "What's a green flag that instantly makes you trust someone?",
+     "caption": "Green flags only today 💚 What's one that instantly makes you trust someone? 👇 Let's fill the comments with good ones.",
+     "hashtags": ["greenflags", "relationships", "datingadvice", "love", "trust", "healthylove"]},
+]
+
+
+def make_engagement(n: int):
+    """Interactive comment-baiting posts: {title, prompt, caption, hashtags}."""
+    if n < 1:
+        return []
+    if _client is None:
+        import random as _r
+        pool = _FALLBACK_ENGAGEMENT[:]
+        _r.shuffle(pool)
+        return pool[:n]
+    try:
+        resp = _client.models.generate_content(
+            model=config.TEXT_MODEL,
+            contents=prompts.engagement_prompt(n, config.ENGAGEMENT_FORMATS))
+        items = _parse_json(resp.text)
+        if not isinstance(items, list) or len(items) < n:
+            raise ValueError("short/invalid engagement response")
+        return items[:n]
+    except Exception as exc:
+        print(f"  Gemini engagement generation failed ({exc}); using local fallback")
+        import random as _r
+        pool = _FALLBACK_ENGAGEMENT[:]
+        _r.shuffle(pool)
+        return pool[:n]
+
+
 def make_reels(n: int):
     """Return a list of reel-script dicts."""
     if _client is None:

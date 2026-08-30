@@ -186,6 +186,9 @@ def generate_batch(offset_days: int = 0):
     # ---- video reels: stock clip + branded text + music -------------------
     video_reels = build_video_reels(day_dir, reel_topics, used_content)
 
+    # ---- interactive engagement posts (comment bait) ----------------------
+    engagement = build_engagement_posts(day_dir, used_content)
+
     # ---- Amazon affiliate product recommendations -------------------------
     products = build_product_posts()
     alerts = []
@@ -202,11 +205,63 @@ def generate_batch(offset_days: int = 0):
 
     (day_dir / "captions.json").write_text(
         json.dumps({"cards": cards, "reels": reels, "video_reels": video_reels,
-                    "products": products, "alerts": alerts}, indent=2),
+                    "products": products, "engagement": engagement, "alerts": alerts},
+                   indent=2),
         encoding="utf-8")
     build_review_html(day_dir, cards, reels)
 
     return day_dir
+
+
+_ENGAGE_BG_QUERIES = [
+    "couple laughing together outdoors", "warm coffee by window morning",
+    "couple silhouette sunset", "cozy blanket candle evening",
+    "wildflowers backlit golden hour", "couple holding hands close",
+    "string lights warm bokeh night", "calm beach dusk pastel sky",
+]
+
+
+def build_engagement_posts(day_dir, used_content):
+    if config.ENGAGEMENT_POSTS_PER_RUN < 1:
+        return []
+    import gen_text
+    import gen_image
+    import compose
+    import random
+
+    print("· writing engagement posts…")
+    items = gen_text.make_engagement(config.ENGAGEMENT_POSTS_PER_RUN)
+    posts = []
+    for i, item in enumerate(items, 1):
+        item = _dedup_one(item, used_content, "prompt",
+                          lambda: gen_text.make_engagement(1)[0])
+        text = (item.get("prompt") or "").strip()
+        if not text:
+            continue
+        query = random.choice(_ENGAGE_BG_QUERIES)
+        bg = gen_image.make_background(query, day_dir / "backgrounds" / f"engage_{i}.png")
+        card_file = f"engage_{i}.png"
+        # longer/fact-style prompts read better as a paragraph card
+        if len(text) > 90 or "\n" in text:
+            compose.make_paragraph_card(bg, text, day_dir / "cards" / card_file,
+                                        title=item.get("title"))
+        else:
+            compose.make_card(bg, text, day_dir / "cards" / card_file,
+                              title=item.get("title"))
+        tags = " ".join("#" + t.lstrip("#") for t in item.get("hashtags", []))
+        caption = (item.get("caption") or text).strip()
+        if tags:
+            caption = f"{caption}\n\n{tags}"
+        posts.append({
+            "file": card_file,
+            "title": item.get("title"),
+            "prompt": text,
+            "caption": caption,
+            "hashtags": item.get("hashtags", []),
+            "kind": "engagement",
+        })
+        print(f"    + engagement: {text[:50]}")
+    return posts
 
 
 def build_product_posts():
