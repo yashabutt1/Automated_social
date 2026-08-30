@@ -188,13 +188,21 @@ def generate_batch(offset_days: int = 0):
 
     # ---- Amazon affiliate product recommendations -------------------------
     products = build_product_posts()
+    alerts = []
+    if config.PRODUCT_POSTS_PER_RUN >= 1:
+        import fetch_products
+        remaining = fetch_products.unposted_count()
+        if remaining <= fetch_products.LOW_POOL_THRESHOLD:
+            alerts.append(
+                f"⚠️ Amazon product pool running low: {remaining} unused product(s) left. "
+                f"Ask Claude to refresh the product list so posts don't run out.")
 
     print("· writing reel scripts…")
     reels = gen_text.make_reels(config.REELS_PER_RUN)
 
     (day_dir / "captions.json").write_text(
         json.dumps({"cards": cards, "reels": reels, "video_reels": video_reels,
-                    "products": products}, indent=2),
+                    "products": products, "alerts": alerts}, indent=2),
         encoding="utf-8")
     build_review_html(day_dir, cards, reels)
 

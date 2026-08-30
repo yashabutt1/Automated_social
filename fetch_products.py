@@ -23,8 +23,11 @@ import requests
 
 import config
 
-_HISTORY_FILE = ".product_history.json"
-_RECENT = 60
+_POSTED_FILE = ".product_posted.json"       # permanent: actually posted to FB
+_SUGGESTED_FILE = ".product_suggested.json"  # short window: recently sent to Telegram
+# When the number of never-posted products left drops to/below this, the daily
+# run flags it so the pool can be refreshed before it runs dry.
+LOW_POOL_THRESHOLD = 6
 
 _ASIN_RE = re.compile(r"(?:/dp/|/gp/product/|/gp/aw/d/|/product/|/d/|asin=)([A-Z0-9]{10})", re.I)
 _BARE_ASIN_RE = re.compile(r"/([A-Z0-9]{10})(?:[/?]|$)")
@@ -117,13 +120,9 @@ def load_products() -> list[dict]:
     return unique
 
 
-def _history_path() -> Path:
-    return config.OUTPUT_DIR / _HISTORY_FILE
-
-
-def _load_recent() -> list[str]:
+def _read_list(name: str) -> list[str]:
     try:
-        data = json.loads(_history_path().read_text(encoding="utf-8"))
+        data = json.loads((config.OUTPUT_DIR / name).read_text(encoding="utf-8"))
         if isinstance(data, list):
             return [str(x) for x in data]
     except Exception:
@@ -131,10 +130,10 @@ def _load_recent() -> list[str]:
     return []
 
 
-def _save_recent(keys: list[str]) -> None:
+def _write_list(name: str, keys: list[str]) -> None:
     try:
-        _history_path().parent.mkdir(parents=True, exist_ok=True)
-        _history_path().write_text(json.dumps(keys[-_RECENT:]), encoding="utf-8")
+        (config.OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+        (config.OUTPUT_DIR / name).write_text(json.dumps(keys), encoding="utf-8")
     except Exception:
         pass
 
@@ -143,20 +142,53 @@ def _key(item: dict) -> str:
     return item.get("asin") or item.get("url")
 
 
+def mark_posted(key: str) -> None:
+    """Permanently retire a product once it's actually been posted to Facebook."""
+    if not key:
+        return
+    posted = _read_list(_POSTED_FILE)
+    if key not in posted:
+        posted.append(key)
+        _write_list(_POSTED_FILE, posted)
+
+
+def unposted_count() -> int:
+    """How many never-POSTED products remain in the pool."""
+    posted = set(_read_list(_POSTED_FILE))
+    return len([p for p in load_products() if _key(p) not in posted])
+
+
 def pick_products(n: int) -> list[dict]:
-    """Pick up to n products not posted recently; each gets an affiliate_url."""
+    """Pick up to n products to suggest.
+
+    Excludes anything already POSTED (permanent) and anything suggested in the
+    last couple of batches (so the same item doesn't reappear the very next day
+    while it's pending). Rejected items simply return to the pool later — they're
+    only retired for good once actually posted (see mark_posted, called on approve).
+    """
     products = load_products()
     if not products:
         return []
-    recent = set(_load_recent())
-    fresh = [p for p in products if _key(p) not in recent]
-    random.shuffle(fresh)
-    if len(fresh) < n:
-        stale = [p for p in products if _key(p) in recent]
-        random.shuffle(stale)
-        fresh += stale
-    chosen = fresh[:n]
+    posted = set(_read_list(_POSTED_FILE))
+    recent_suggested = set(_read_list(_SUGGESTED_FILE))
+
+    # Prefer items neither posted nor just-suggested; fall back to not-posted.
+    primary = [p for p in products if _key(p) not in posted and _key(p) not in recent_suggested]
+    fallback = [p for p in products if _key(p) not in posted]
+    random.shuffle(primary)
+    random.shuffle(fallback)
+    ordered, seen = [], set()
+    for p in primary + fallback:
+        k = _key(p)
+        if k in seen:
+            continue
+        seen.add(k)
+        ordered.append(p)
+
+    chosen = ordered[:n]
     for p in chosen:
         p["affiliate_url"] = build_affiliate_url(p["url"])
-    _save_recent(_load_recent() + [_key(p) for p in chosen])
+    # Remember what we just suggested (keep a short rolling window).
+    new_suggested = (_read_list(_SUGGESTED_FILE) + [_key(p) for p in chosen])[-(n * 3):]
+    _write_list(_SUGGESTED_FILE, new_suggested)
     return chosen

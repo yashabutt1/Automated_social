@@ -43,6 +43,14 @@ def send_photo(image_path, caption, callback_data):
     return payload
 
 
+def send_notice(text):
+    """Plain informational message (no approve/reject buttons)."""
+    token = _env("TELEGRAM_BOT_TOKEN")
+    chat_id = _env("TELEGRAM_CHAT_ID")
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    requests.post(url, data={"chat_id": chat_id, "text": text[:4000]}, timeout=60)
+
+
 def send_message(text, callback_data):
     token = _env("TELEGRAM_BOT_TOKEN")
     chat_id = _env("TELEGRAM_CHAT_ID")
@@ -142,6 +150,11 @@ def send_latest_batch(output_dir: Path):
             print(f"Sending product {item.get('name','')[:40]}...")
             send_message(f"🛒 PRODUCT POST\n\n{text}",
                          f"{output_dir.name}/products/{asin}")
+
+        # Informational alerts (e.g. product pool running low) — no buttons.
+        for msg in payload.get("alerts", []):
+            print(f"Sending alert: {msg[:50]}")
+            send_notice(msg)
 
 
 def main(argv=None):

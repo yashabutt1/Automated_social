@@ -161,6 +161,11 @@ def process_update(update):
             result = post_fb.post_link(post.get("fb_message", post.get("caption", "")),
                                        post["url"])
             kind = "product"
+            try:
+                import fetch_products
+                fetch_products.mark_posted(post.get("asin") or post.get("url"))
+            except Exception as mp_exc:
+                _log(f"Warning: could not mark product posted: {mp_exc}")
         else:
             section = "video_reels" if is_reel else "cards"
             caption = ""
