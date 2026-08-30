@@ -197,13 +197,15 @@ def generate_batch(offset_days: int = 0):
     return day_dir
 
 
-def _reel_caption(item, topic):
-    """Hook line + soft engagement question + follow CTA + hashtags."""
+def _reel_caption(item, topic, music_credit=None):
+    """Hook line + soft engagement question + follow CTA + music credit + hashtags."""
     tags = " ".join("#" + t.lstrip("#") for t in item.get("hashtags", []))
     parts = [item.get("line", "").strip()]
     if item.get("caption"):
         parts.append(item["caption"].strip())
     parts.append(f"Follow {config.HANDLE} for a little more love every day. 💛")
+    if music_credit:
+        parts.append(music_credit)
     if tags:
         parts.append(tags)
     return "\n\n".join(p for p in parts if p)
@@ -231,8 +233,10 @@ def build_video_reels(day_dir, reel_topics, used_content):
             print("  no clip available (needs PEXELS_API_KEY / network); skipping reel")
             continue
         music = fetch_music.pick_track()
+        music_name = os.path.basename(music) if music else None
+        music_credit = fetch_music.credit_line(music_name) if music_name else None
         reel_file = f"reel_{i}.mp4"
-        print(f"  composing reel (music: {os.path.basename(music) if music else 'none'})…")
+        print(f"  composing reel (music: {music_name or 'none'})…")
         try:
             compose_video.make_reel(clip["path"], item.get("title"), item["line"],
                                     day_dir / "reels" / reel_file, music_path=music)
@@ -244,8 +248,9 @@ def build_video_reels(day_dir, reel_topics, used_content):
             "file": reel_file,
             "topic": topic["id"],
             "visual": visual["category"],
-            "caption": _reel_caption(item, topic),
-            "music": os.path.basename(music) if music else None,
+            "caption": _reel_caption(item, topic, music_credit),
+            "music": music_name,
+            "music_credit": music_credit,
         })
     return video_reels
 

@@ -14,7 +14,26 @@ from pathlib import Path
 import config
 
 _HISTORY_FILE = ".music_history.json"
+_ATTRIB_FILE = "attribution.json"
 _AUDIO_EXTS = {".mp3", ".m4a", ".wav", ".aac", ".ogg", ".flac"}
+
+
+def attribution_for(track_name: str) -> dict | None:
+    """Return the attribution record for a track filename, if one exists."""
+    try:
+        data = json.loads((config.MUSIC_DIR / _ATTRIB_FILE).read_text(encoding="utf-8"))
+        return data.get(track_name)
+    except Exception:
+        return None
+
+
+def credit_line(track_name: str) -> str | None:
+    """CC-BY credit line for a track, or None (e.g. no-attribution Pixabay track)."""
+    a = attribution_for(track_name)
+    if not a:
+        return None
+    return (f"\U0001F3B5 \"{a.get('title','')}\" by {a.get('artist','')} "
+            f"({a.get('source','ccMixter')}), licensed under {a.get('license','CC BY')}")
 
 
 def _history_path() -> Path:
