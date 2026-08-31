@@ -131,6 +131,13 @@ def _dedup_one(item, used_content, key, generator):
     return item
 
 
+def _with_cta(caption, *ctas):
+    """Append calls-to-action (follow/share/save/tag) to a caption."""
+    caption = (caption or "").strip()
+    tail = "\n".join(c for c in ctas if c)
+    return f"{caption}\n\n{tail}" if tail else caption
+
+
 def generate_batch(offset_days: int = 0):
     import gen_image
     import gen_text
@@ -170,7 +177,8 @@ def generate_batch(offset_days: int = 0):
         print("  composing text…")
         compose.make_card(bg, item["line"], day_dir / "cards" / card_file,
                           title=item.get("title"))
-        cards.append({**item, "file": card_file, "topic": topic["id"]})
+        cards.append({**item, "file": card_file, "topic": topic["id"],
+                      "caption": _with_cta(item.get("caption"), config.CTA_FOLLOW, config.CTA_SHARE)})
 
     for i, (topic, item) in enumerate(zip(para_topics, para_items), 1):
         item = _dedup_one(item, used_content, "body",
@@ -181,7 +189,8 @@ def generate_batch(offset_days: int = 0):
         print("  composing paragraph…")
         compose.make_paragraph_card(bg, item["body"], day_dir / "cards" / card_file,
                                     title=item.get("title"))
-        cards.append({**item, "file": card_file, "body": item["body"], "topic": topic["id"]})
+        cards.append({**item, "file": card_file, "body": item["body"], "topic": topic["id"],
+                      "caption": _with_cta(item.get("caption"), config.CTA_FOLLOW, config.CTA_SAVE)})
 
     # ---- video reels: stock clip + branded text + music -------------------
     video_reels = build_video_reels(day_dir, reel_topics, used_content)
@@ -249,7 +258,7 @@ def build_engagement_posts(day_dir, used_content):
             compose.make_card(bg, text, day_dir / "cards" / card_file,
                               title=item.get("title"))
         tags = " ".join("#" + t.lstrip("#") for t in item.get("hashtags", []))
-        caption = (item.get("caption") or text).strip()
+        caption = _with_cta((item.get("caption") or text).strip(), config.CTA_FOLLOW)
         if tags:
             caption = f"{caption}\n\n{tags}"
         posts.append({
@@ -287,9 +296,9 @@ def build_product_posts():
             "url": url,
             "caption": text,
             # what Telegram shows (link inline so it previews + is tappable)
-            "tg_text": f"{text}\n\n{url}",
+            "tg_text": f"{text}\n\n{config.CTA_TAG}\n\n{url}",
             # what gets posted to Facebook (link passed separately as the card)
-            "fb_message": text,
+            "fb_message": f"{text}\n\n{config.CTA_TAG}",
         })
         print(f"    + {p['name'][:45]} -> {url}")
     return posts
@@ -301,7 +310,7 @@ def _reel_caption(item, topic, music_credit=None):
     parts = [item.get("line", "").strip()]
     if item.get("caption"):
         parts.append(item["caption"].strip())
-    parts.append(f"Follow {config.HANDLE} for a little more love every day. 💛")
+    parts.append(f"{config.CTA_FOLLOW}\n{config.CTA_SAVE}\n{config.CTA_SHARE}")
     if music_credit:
         parts.append(music_credit)
     if tags:

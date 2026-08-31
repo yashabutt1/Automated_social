@@ -11,6 +11,15 @@ PAGE_NAME = "The Love Lens"
 HANDLE = "@thelovelensforall"    # shown small on cards; set to "" to hide
 
 # ---------------------------------------------------------------------------
+# Calls-to-action appended to captions to boost reach (follow/share/save/tag).
+# These signals (shares, saves, comments) are what the algorithm rewards.
+# ---------------------------------------------------------------------------
+CTA_FOLLOW = f"❤️ Follow {HANDLE} for a little more love, every day."
+CTA_SHARE = "🔁 Share this with someone who needs to see it today."
+CTA_SAVE = "🔖 Save this for when you need the reminder."
+CTA_TAG = "💝 Tag someone who'd love this."
+
+# ---------------------------------------------------------------------------
 # Models  (verify current names at ai.google.dev/gemini-api/docs/models)
 # ---------------------------------------------------------------------------
 # GEMINI_API_KEY powers the text side. Backgrounds now come from Pexels stock
