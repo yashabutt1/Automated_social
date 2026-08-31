@@ -96,8 +96,14 @@ def send_video(video_path, caption, callback_data):
 
 
 def _latest_output_dir() -> Path:
+    # Prefer the batch just generated for the current slot (morning/evening),
+    # so the evening run notifies the evening batch, not the morning one.
+    current = config.current_batch_dir()
+    if (current / "captions.json").exists():
+        return current
     output_root = config.OUTPUT_DIR
-    dirs = sorted(p for p in output_root.iterdir() if p.is_dir())
+    dirs = sorted((p for p in output_root.iterdir() if p.is_dir()),
+                  key=lambda p: p.stat().st_mtime)
     if not dirs:
         raise FileNotFoundError("No output directories found")
     return dirs[-1]

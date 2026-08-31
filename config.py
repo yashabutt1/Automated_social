@@ -38,12 +38,14 @@ DECORATE_FLORALS = True
 # ---------------------------------------------------------------------------
 # How much to make each run
 # ---------------------------------------------------------------------------
-CARDS_PER_RUN = 3      # short quote cards (text on photo background)
-PARAGRAPH_CARDS_PER_RUN = 3  # longer micro-essay cards
+# Counts are PER BATCH. The pipeline runs twice a day (morning + evening slots),
+# so daily totals are roughly double these.
+CARDS_PER_RUN = 2      # short quote cards (text on photo background)
+PARAGRAPH_CARDS_PER_RUN = 1  # longer micro-essay cards
 REELS_PER_RUN = 1      # reel scripts (text output only, you film/animate)
-VIDEO_REELS_PER_RUN = 2  # finished video reels (stock clip + text + music)
-PRODUCT_POSTS_PER_RUN = 3  # Amazon affiliate product recommendations per day
-ENGAGEMENT_POSTS_PER_RUN = 3  # interactive "comment below" question/fact posts
+VIDEO_REELS_PER_RUN = 1  # finished video reels (stock clip + text + music)
+PRODUCT_POSTS_PER_RUN = 2  # Amazon affiliate product recommendations per batch
+ENGAGEMENT_POSTS_PER_RUN = 2  # interactive "comment below" question/fact posts
 
 # ---------------------------------------------------------------------------
 # Amazon Associates (manual-link mode — no PA-API)
@@ -153,3 +155,20 @@ REEL_FORMATS = [
 # Paths
 # ---------------------------------------------------------------------------
 OUTPUT_DIR = Path(__file__).parent / "output"
+
+
+def slot_suffix() -> str:
+    """'-morning' / '-evening' when running as a scheduled slot, else ''."""
+    s = _os.getenv("LOVELENS_SLOT", "").strip()
+    return f"-{s}" if s else ""
+
+
+def today_dirname(offset_days: int = 0) -> str:
+    from datetime import date, timedelta
+    return (date.today() + timedelta(days=offset_days)).isoformat() + slot_suffix()
+
+
+def current_batch_dir(offset_days: int = 0) -> Path:
+    """The folder for the batch being generated/sent right now (slot-aware),
+    so a morning and evening run on the same day don't overwrite each other."""
+    return OUTPUT_DIR / today_dirname(offset_days)

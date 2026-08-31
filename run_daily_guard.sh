@@ -3,32 +3,42 @@ set -euo pipefail
 
 PROJECT_DIR="/Users/yashabutt/love-lens-pipeline"
 VENV_PYTHON="$PROJECT_DIR/.venv/bin/python"
-LAST_RUN_FILE="$PROJECT_DIR/output/.last_run_date"
 LOG_FILE="$PROJECT_DIR/cron.log"
 
 mkdir -p "$PROJECT_DIR/output"
 
-now=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-today=$(date -u +"%Y-%m-%d")
+# Local time (not UTC) so slots line up with the audience's day.
+today=$(date +%F)
+hour=$((10#$(date +%H)))          # 0-23, leading zero stripped
+now=$(date +"%Y-%m-%d %H:%M:%S %Z")
 
-if [ -f "$LAST_RUN_FILE" ]; then
-  last_run_date=$(cat "$LAST_RUN_FILE" | tr -d ' \t\r\n') || last_run_date=""
-else
-  last_run_date=""
+# Run one slot (morning/evening) at most once per local day. Each slot generates
+# into its own output/<date>-<slot> folder (LOVELENS_SLOT) so the evening batch
+# never overwrites the morning batch that's still awaiting approval.
+run_slot() {
+  slot="$1"
+  marker="$PROJECT_DIR/output/.last_run_$slot"
+  last=""
+  [ -f "$marker" ] && last=$(tr -d ' \t\r\n' < "$marker")
+  if [ "$last" = "$today" ]; then
+    return 0
+  fi
+  cd "$PROJECT_DIR"
+  if LOVELENS_SLOT="$slot" "$VENV_PYTHON" run.py \
+     && LOVELENS_SLOT="$slot" "$VENV_PYTHON" notify.py; then
+    echo "$today" > "$marker"
+    echo "$now ran $slot" >> "$LOG_FILE"
+  else
+    echo "$now failed $slot, will retry" >> "$LOG_FILE"
+  fi
+}
+
+# Morning slot: first cron tick in the 07:00-11:59 local window.
+if [ "$hour" -ge 7 ] && [ "$hour" -lt 12 ]; then
+  run_slot morning
 fi
 
-if [ "$last_run_date" = "$today" ]; then
-  echo "$now skipped, already done today" >> "$LOG_FILE"
-  exit 0
-fi
-
-cd "$PROJECT_DIR"
-
-if "$VENV_PYTHON" run.py && "$VENV_PYTHON" notify.py; then
-  echo "$today" > "$LAST_RUN_FILE"
-  echo "$now ran" >> "$LOG_FILE"
-  exit 0
-else
-  echo "$now failed, will retry" >> "$LOG_FILE"
-  exit 1
+# Evening slot: first cron tick in the 18:00-22:59 local window.
+if [ "$hour" -ge 18 ] && [ "$hour" -lt 23 ]; then
+  run_slot evening
 fi

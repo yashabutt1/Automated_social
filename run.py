@@ -44,7 +44,7 @@ def parse_args(argv=None):
 
 
 def _day_dir(offset_days: int = 0) -> Path:
-    d = config.OUTPUT_DIR / (date.today() + timedelta(days=offset_days)).isoformat()
+    d = config.current_batch_dir(offset_days)
     (d / "cards").mkdir(parents=True, exist_ok=True)
     (d / "backgrounds").mkdir(parents=True, exist_ok=True)
     (d / "reels").mkdir(parents=True, exist_ok=True)

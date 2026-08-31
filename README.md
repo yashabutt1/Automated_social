@@ -89,11 +89,20 @@ The automation flow is:
 
 ## Cron line
 
-Use this in crontab:
+Use this in crontab (hourly; the guard decides when to actually run):
 
 ```cron
 0 * * * * /Users/yashabutt/love-lens-pipeline/run_daily_guard.sh
 ```
+
+[run_daily_guard.sh](run_daily_guard.sh) runs **two batches a day in local time** —
+a **morning** slot (first tick in 07:00–11:59) and an **evening** slot (18:00–22:59) —
+so content lands in both peak windows instead of once at UTC midnight. Each slot
+generates into its own `output/<date>-<slot>` folder (via `LOVELENS_SLOT`) so the
+evening batch never overwrites the morning one that's still awaiting approval.
+On a laptop, cron only fires while the Mac is awake, so a slot runs at the first
+hourly tick inside its window that the machine is on; if the Mac is closed for a
+whole window that slot is skipped for the day.
 
 ## Launchd service for macOS
 
