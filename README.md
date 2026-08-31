@@ -87,9 +87,33 @@ The automation flow is:
 5. [approve_bot.py](approve_bot.py) posts approved cards to Facebook using the real caption from the matching entry in captions.json.
 6. Already-posted files are tracked so a crash or restart does not re-post them.
 
-## Cron line
+## Scheduling — launchd (recommended for a laptop)
 
-Use this in crontab (hourly; the guard decides when to actually run):
+Two launchd agents generate the morning and evening batches:
+[com.lovelens.morning.plist](com.lovelens.morning.plist) (07:00) and
+[com.lovelens.evening.plist](com.lovelens.evening.plist) (18:30). launchd runs a
+missed job the moment the Mac next wakes, so a laptop that sleeps still produces
+each batch — unlike cron, which just skips. Both call
+[run_slot.sh](run_slot.sh), which is guarded by a once-per-day marker and an
+atomic lock (so nothing double-runs). Install:
+
+```bash
+cp com.lovelens.morning.plist com.lovelens.evening.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.lovelens.morning.plist
+launchctl load ~/Library/LaunchAgents/com.lovelens.evening.plist
+```
+
+To make it fire at exactly 07:00 even when closed, also schedule a wake (admin):
+
+```bash
+sudo pmset repeat wakeorpoweron MTWRFSU 06:55:00
+```
+
+### Optional cron fallback
+
+[run_daily_guard.sh](run_daily_guard.sh) is an hourly-cron alternative that runs
+the right slot inside its local window (it shares the same marker + lock, so it's
+safe alongside launchd):
 
 ```cron
 0 * * * * /Users/yashabutt/love-lens-pipeline/run_daily_guard.sh
