@@ -170,8 +170,10 @@ def process_update(update):
             if is_reel:
                 lookup = captions_data.get("video_reels", [])
             else:
-                # quote/paragraph cards and engagement cards both post as photos
-                lookup = captions_data.get("cards", []) + captions_data.get("engagement", [])
+                # quote/paragraph cards, engagement, and reflections all post as photos
+                lookup = (captions_data.get("cards", [])
+                          + captions_data.get("engagement", [])
+                          + captions_data.get("reflections", []))
             caption = ""
             for item in lookup:
                 if item.get("file") == base_name:

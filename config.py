@@ -56,10 +56,11 @@ DECORATE_FLORALS = True
 # are trimmed. Paragraph cards stay (older-women audiences love & share them).
 CARDS_PER_RUN = 1      # short quote cards (-> ~2/day)
 PARAGRAPH_CARDS_PER_RUN = 1  # heartfelt micro-essay cards (-> ~2/day, shareable)
-REELS_PER_RUN = 1      # reel scripts (text output only; not posted)
+REELS_PER_RUN = 0      # reel SCRIPTS are not posted — off to save Gemini quota
 VIDEO_REELS_PER_RUN = 2  # finished video reels (-> ~4/day, the growth engine)
 PRODUCT_POSTS_PER_RUN = 1  # Amazon affiliate product recommendations (-> ~2/day)
 ENGAGEMENT_POSTS_PER_RUN = 1  # interactive "comment below" posts (-> ~2/day)
+REFLECTION_POSTS_PER_RUN = 1  # long-form essay woven around a famous quote (-> ~2/day)
 
 # ---------------------------------------------------------------------------
 # Amazon Associates (manual-link mode — no PA-API)

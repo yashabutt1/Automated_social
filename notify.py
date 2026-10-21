@@ -138,6 +138,19 @@ def send_latest_batch(output_dir: Path):
     if captions_path.exists():
         payload = json.loads(captions_path.read_text(encoding="utf-8"))
 
+        # Long-form reflection essays (image in cards/, long caption).
+        for item in payload.get("reflections", []):
+            file_name = item.get("file")
+            if not file_name:
+                continue
+            image_path = output_dir / "cards" / file_name
+            if not image_path.exists():
+                continue
+            caption = item.get("caption") or item.get("essay") or "New reflection post"
+            print(f"Sending reflection {file_name}...")
+            send_photo(image_path, f"📝 REFLECTION POST\n\n{caption}",
+                       f"{output_dir.name}/{file_name}")
+
         # Interactive engagement cards (images in cards/) — same buttons.
         for item in payload.get("engagement", []):
             file_name = item.get("file")

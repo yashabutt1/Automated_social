@@ -198,6 +198,9 @@ def generate_batch(offset_days: int = 0):
     # ---- interactive engagement posts (comment bait) ----------------------
     engagement = build_engagement_posts(day_dir, used_content)
 
+    # ---- long-form reflection essays (famous quote + warm essay) ----------
+    reflections = build_reflection_posts(day_dir, used_content)
+
     # ---- Amazon affiliate product recommendations -------------------------
     products = build_product_posts()
     alerts = []
@@ -223,7 +226,8 @@ def generate_batch(offset_days: int = 0):
 
     (day_dir / "captions.json").write_text(
         json.dumps({"cards": cards, "reels": reels, "video_reels": video_reels,
-                    "products": products, "engagement": engagement, "alerts": alerts},
+                    "products": products, "engagement": engagement,
+                    "reflections": reflections, "alerts": alerts},
                    indent=2),
         encoding="utf-8")
     build_review_html(day_dir, cards, reels)
@@ -279,6 +283,60 @@ def build_engagement_posts(day_dir, used_content):
             "kind": "engagement",
         })
         print(f"    + engagement: {text[:50]}")
+    return posts
+
+
+_REFLECTION_BG_QUERIES = [
+    "cozy cottage candle flowers warm", "woman coffee window autumn morning",
+    "sunset lake mountains warm golden", "candle lantern flowers rustic",
+    "warm porch flowers sunset", "fireplace cozy blanket tea", "wildflowers golden hour field",
+]
+
+
+def build_reflection_posts(day_dir, used_content):
+    if config.REFLECTION_POSTS_PER_RUN < 1:
+        return []
+    import gen_text
+    import gen_image
+    import compose
+    import quotes
+    import random
+
+    print("· writing reflection essays…")
+    picked = quotes.pick_quotes(config.REFLECTION_POSTS_PER_RUN)
+    posts = []
+    for i, q in enumerate(picked, 1):
+        item = gen_text.make_reflection(q)
+        essay = (item.get("essay") or "").strip()
+        # regenerate once if this essay already appeared before
+        if essay and dedupe._normalize_text(essay) in used_content:
+            item = gen_text.make_reflection(q)
+            essay = (item.get("essay") or "").strip()
+        if essay:
+            used_content.add(dedupe._normalize_text(essay))
+
+        query = random.choice(_REFLECTION_BG_QUERIES)
+        bg = gen_image.make_background(query, day_dir / "backgrounds" / f"reflect_{i}.png")
+        card_file = f"reflect_{i}.png"
+        # the image card shows the quote + attribution
+        card_body = f"“{q['text']}”\n\n— {q['author']}"
+        compose.make_paragraph_card(bg, card_body, day_dir / "cards" / card_file,
+                                    title=item.get("title") or "A Thought")
+
+        tags = " ".join("#" + t.lstrip("#") for t in item.get("hashtags", []))
+        caption = _with_cta(essay, config.CTA_SHARE, config.CTA_FOLLOW)
+        if tags:
+            caption = f"{caption}\n\n{tags}"
+        posts.append({
+            "file": card_file,
+            "title": item.get("title"),
+            "quote": q["text"],
+            "author": q["author"],
+            "essay": essay,
+            "caption": caption,
+            "kind": "reflection",
+        })
+        print(f"    + reflection on {q['author']}")
     return posts
 
 

@@ -290,6 +290,40 @@ _FALLBACK_ENGAGEMENT = [
 ]
 
 
+def _fallback_reflection(quote: dict) -> dict:
+    q, a = quote["text"], quote["author"]
+    essay = (f"Have you ever read a line that stops you in your tracks?\n\n"
+             f"{a} once said:\n\n\"{q}\"\n\n"
+             f"Isn't that the truth? Sometimes the most precious things in our "
+             f"lives are the quiet, ordinary ones — a familiar laugh, a hand held "
+             f"across the table, a slow morning that felt like nothing at the time.\n\n"
+             f"Until one day, we realize those small moments were the whole gift.\n\n"
+             f"So today, let's linger a little longer. Love a little louder. And "
+             f"tell the people who matter just how much they do.\n\n"
+             f"Because the smallest moments often leave the biggest imprint on our hearts. 💛")
+    return {"title": "A Thought", "essay": essay,
+            "hashtags": ["love", "gratitude", "happiness", "family", "wisdom", "blessed"]}
+
+
+def make_reflection(quote: dict):
+    """A long-form reflection essay woven around a real curated quote."""
+    if _client is None:
+        return _fallback_reflection(quote)
+    try:
+        resp = _client.models.generate_content(
+            model=config.TEXT_MODEL,
+            contents=prompts.reflection_prompt(quote["text"], quote["author"]))
+        data = _parse_json(resp.text)
+        if isinstance(data, list):
+            data = data[0]
+        if not isinstance(data, dict) or not data.get("essay"):
+            raise ValueError("invalid reflection response")
+        return data
+    except Exception as exc:
+        print(f"  Gemini reflection failed ({exc}); using local fallback")
+        return _fallback_reflection(quote)
+
+
 def make_engagement(n: int):
     """Interactive comment-baiting posts: {title, prompt, caption, hashtags}."""
     if n < 1:
@@ -317,6 +351,8 @@ def make_engagement(n: int):
 
 def make_reels(n: int):
     """Return a list of reel-script dicts."""
+    if n < 1:
+        return []
     if _client is None:
         return _fallback_reels(n)
     try:

@@ -59,6 +59,10 @@ def load_used_content(output_root: Path | str) -> set[str]:
             value = item.get("line")
             if value:
                 used.add(_normalize_text(value))
+        for item in payload.get("reflections", []):
+            value = item.get("essay")
+            if value:
+                used.add(_normalize_text(value))
     return used
 
 

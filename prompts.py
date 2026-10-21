@@ -89,6 +89,35 @@ no markdown, no backticks:
 Give 6 to 9 hashtags each, mixing broad and niche, relevant to that item's topic."""
 
 
+def reflection_prompt(quote: str, author: str) -> str:
+    """A long-form, warm reflection essay woven around a real famous quote —
+    the shareable 'Thoughts That Linger' style."""
+    return f"""{RULES}
+
+Write ONE long, warm, reflective Facebook post (a mini-essay) built around this
+REAL quote. Do NOT change the quote's wording and do NOT invent a different
+author — use it exactly and attribute it exactly as given:
+
+QUOTE: "{quote}"
+AUTHOR: {author}
+
+Structure (follow it loosely, keep it human):
+- Open with a relatable question that draws the reader in ("Have you ever...").
+- Lead naturally into the quote and attribute it to {author}.
+- Reflect on it in short, easy paragraphs (1-2 sentences each, blank line between)
+  — warm, first-person, gently wise, deeply POSITIVE and uplifting.
+- Build toward a hopeful, heart-tugging message about love, family, memories,
+  gratitude, or being present.
+- End with a short run of uplifting takeaways (e.g. "To linger a little longer.
+  To laugh a little louder.") and a line that makes the reader want to SHARE it.
+- 180-320 words. No hashtags inside the essay.
+
+Also give a short 1-3 word script title for the image card, and 6-9 hashtags.
+
+Respond with ONLY a JSON object, no markdown:
+{{"title": "...", "essay": "...", "hashtags": ["...", "..."]}}"""
+
+
 def engagement_prompt(n: int, formats: list[str]) -> str:
     """Interactive posts designed to pull comments."""
     fmt_list = "\n".join(f"- {f}" for f in formats)
