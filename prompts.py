@@ -17,6 +17,17 @@ Non-negotiable rules:
 - Grounded in healthy relationship psychology: connection, communication, care, self-respect.
 - No manipulation tactics, no "get your ex back" tricks, no clinical mental-health diagnoses or claims.
 - Voice: warm, human, a little poetic, never preachy, never abstract poster-speak.
+
+MAKE IT SHAREABLE (very important — this is how the page grows):
+- Lead with POSITIVITY, hope, warmth, and happiness. This audience shares what
+  uplifts them, not what stings.
+- Give real VALUE in every post: a gentle insight, a small practical solution or
+  habit to try, or an uplifting reframe — not just a pretty sentence.
+- Be SOLUTION-ORIENTED: name the good feeling or the small thing that helps, more
+  than the problem.
+- End on a warm, hopeful, or empowering note that makes the reader want to SHARE
+  it to her own timeline or send it to someone she loves.
+- Aim for the "yes, exactly — I'm sharing this" reaction.
 """
 
 

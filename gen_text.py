@@ -254,9 +254,18 @@ def make_product_captions(products: list[dict]):
 
 
 _FALLBACK_ENGAGEMENT = [
-    {"title": "Your Turn", "prompt": "What's one relationship truth you wish you knew sooner?",
-     "caption": "We all learn a few of these the hard way. 💭 What's one relationship truth you wish you knew sooner? 👇 Drop it below — someone here needs to read it today.",
-     "hashtags": ["relationships", "datingadvice", "relationshiptruths", "love", "growth", "selflove"]},
+    {"title": "Share If", "prompt": "A good husband is a blessing, not a given.",
+     "caption": "A good husband is a blessing, not a given. 💛 Share if you're grateful for yours — let's fill the feed with a little gratitude today.",
+     "hashtags": ["marriage", "grateful", "love", "blessed", "husband", "relationships"]},
+    {"title": "Grandma Said", "prompt": "The best love advice my grandmother gave me was ______.",
+     "caption": "Finish the sentence 💛 The best love advice my grandmother (or mom) ever gave me was ______. 👇 I can't wait to read these.",
+     "hashtags": ["love", "wisdom", "marriage", "family", "grandmother", "relationships"]},
+    {"title": "A Reminder", "prompt": "It is never too late for your happiest chapter.",
+     "caption": "Your best love story might still be ahead of you. 🌅 It is never too late. 👇 Tag someone who needs this reminder today.",
+     "hashtags": ["hope", "love", "nevertoolate", "newbeginnings", "faith", "happiness"]},
+    {"title": "Your Turn", "prompt": "What's one thing decades of love has taught you?",
+     "caption": "The ones who've loved a long time know things the rest of us are still learning. 💭 What's one thing love has taught you over the years? 👇 Share your wisdom below.",
+     "hashtags": ["marriage", "love", "wisdom", "relationships", "lastinglove", "truth"]},
     {"title": "Fill In", "prompt": "Real love feels like ______.",
      "caption": "Finish the sentence: real love feels like ______. 👇 I'll go first in the comments.",
      "hashtags": ["love", "relationships", "realtalk", "couplegoals", "romance", "feelings"]},

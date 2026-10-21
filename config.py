@@ -148,13 +148,14 @@ STYLE_SUFFIX = (
 # Rotating reel-script formats (matches your starter kit)
 # ---------------------------------------------------------------------------
 ENGAGEMENT_FORMATS = [
-    "A question about relationship truths (e.g. 'What's one relationship truth you wish you knew sooner?')",
-    "Fill-in-the-blank (e.g. 'Real love feels like ______.')",
-    "This or that (make them pick a side and defend it)",
-    "Would you rather (two tempting relationship options)",
+    "A 'share if you agree' positive affirmation — a warm, uplifting truth about love or marriage that women proudly re-share to their own timeline (e.g. 'A good husband is a blessing, not a given. Share if you're grateful for yours.')",
+    "A tiny PRACTICAL tip or habit that makes a relationship better today — real, useful value people save and share",
+    "Finish the sentence: the best love advice my mother or grandmother ever gave me was ______ (nostalgic, highly shareable)",
+    "A hopeful blessing / gentle reminder for someone who needs it today (invites 'tag someone' and shares)",
+    "A question about relationship truths (e.g. 'What's one thing decades of love has taught you?')",
+    "Fill-in-the-blank (e.g. 'After all these years, real love feels like ______.')",
+    "A surprising TRUE, uplifting fun fact about love/long marriages/the science of connection + a warm question",
     "Finish the sentence (e.g. 'I feel most loved when...')",
-    "A surprising TRUE fun fact about love/attraction/history + a question that invites reactions",
-    "A gentle hot-take / unpopular opinion that invites agree-or-disagree",
 ]
 
 REEL_FORMATS = [
