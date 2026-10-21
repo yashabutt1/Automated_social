@@ -10,6 +10,17 @@ from pathlib import Path
 PAGE_NAME = "The Love Lens"
 HANDLE = "@thelovelensforall"    # shown small on cards; set to "" to hide
 
+# Who actually follows the page (from Insights): shapes the voice of every post.
+AUDIENCE = (
+    "Your audience is mostly WOMEN aged 35-65+ in the United States — wives, moms, "
+    "and grandmothers who have loved, lost, and loved again. Write for mature grown "
+    "women reflecting on real, lasting love: marriage, long partnership, family, "
+    "raising kids, empty nests, healing after heartbreak later in life, faith, "
+    "gratitude, and self-worth earned over decades. Warm, heartfelt, a little "
+    "nostalgic, the kind of thing a woman proudly shares to her own timeline. AVOID "
+    "teen/Gen-Z dating slang, 'situationships', hookup culture, and texting-anxiety "
+    "framing unless a topic genuinely calls for it.")
+
 # ---------------------------------------------------------------------------
 # Calls-to-action appended to captions to boost reach (follow/share/save/tag).
 # These signals (shares, saves, comments) are what the algorithm rewards.
@@ -40,12 +51,15 @@ DECORATE_FLORALS = True
 # ---------------------------------------------------------------------------
 # Counts are PER BATCH. The pipeline runs twice a day (morning + evening slots),
 # so daily totals are roughly double these.
-CARDS_PER_RUN = 2      # short quote cards (text on photo background)
-PARAGRAPH_CARDS_PER_RUN = 1  # longer micro-essay cards
-REELS_PER_RUN = 1      # reel scripts (text output only, you film/animate)
-VIDEO_REELS_PER_RUN = 1  # finished video reels (stock clip + text + music)
-PRODUCT_POSTS_PER_RUN = 2  # Amazon affiliate product recommendations per batch
-ENGAGEMENT_POSTS_PER_RUN = 2  # interactive "comment below" question/fact posts
+# REELS-FIRST: reels are the only format Facebook pushes to NON-followers, so
+# they're weighted heaviest. Feed cards mostly reach existing followers, so they
+# are trimmed. Paragraph cards stay (older-women audiences love & share them).
+CARDS_PER_RUN = 1      # short quote cards (-> ~2/day)
+PARAGRAPH_CARDS_PER_RUN = 1  # heartfelt micro-essay cards (-> ~2/day, shareable)
+REELS_PER_RUN = 1      # reel scripts (text output only; not posted)
+VIDEO_REELS_PER_RUN = 2  # finished video reels (-> ~4/day, the growth engine)
+PRODUCT_POSTS_PER_RUN = 1  # Amazon affiliate product recommendations (-> ~2/day)
+ENGAGEMENT_POSTS_PER_RUN = 1  # interactive "comment below" posts (-> ~2/day)
 
 # ---------------------------------------------------------------------------
 # Amazon Associates (manual-link mode — no PA-API)

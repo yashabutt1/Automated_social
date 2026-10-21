@@ -21,9 +21,10 @@ CATEGORIES: dict[str, list[str]] = {
         "snow falling pine forest", "lavender field sunset", "waterfall lush green",
     ],
     "love": [
-        "couple holding hands walking", "couple laughing together outdoors", "couple hugging sunset",
-        "couple walking beach evening", "couple dancing slow", "couple forehead touch tender",
-        "couple silhouette sunset", "couple coffee morning cozy",
+        "older couple holding hands walking", "mature couple laughing together",
+        "senior couple dancing at home", "grandparents couple sunset", "couple hugging warm",
+        "older couple forehead touch tender", "couple silhouette sunset",
+        "family hug multigenerational", "couple grey hair smiling", "couple coffee morning cozy",
     ],
     "aesthetic": [
         "coffee steam morning light", "candle flame cozy dark", "book pages turning sunlight",

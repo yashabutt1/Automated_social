@@ -6,7 +6,12 @@ Every prompt is now built around a single *topic* (see topics.py) so each card
 covers different ground instead of circling the same subject every run.
 """
 
-RULES = """You write for a warm, faceless love & relationships page.
+import config
+
+RULES = f"""You write for a warm, faceless love & relationships page.
+
+AUDIENCE: {config.AUDIENCE}
+
 Non-negotiable rules:
 - Original wording only. Never copy known quotes, lyrics, or any specific creator's phrasing.
 - Grounded in healthy relationship psychology: connection, communication, care, self-respect.
@@ -105,6 +110,10 @@ def product_prompt(names: list[str]) -> str:
     listing = "\n".join(f"{i}. {name}" for i, name in enumerate(names, 1))
     return f"""You write short, warm, irresistible product captions for a love &
 relationships page whose audience buys thoughtful gifts for the people they love.
+
+AUDIENCE: {config.AUDIENCE}
+Frame gifts for how THIS audience gives: to a spouse of many years, an adult
+child, a grandchild, a dear friend, or to treat herself.
 
 Products (write exactly one caption for EACH, in this order):
 {listing}
