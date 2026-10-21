@@ -88,6 +88,12 @@ _BIN = Path(__file__).parent / "bin"
 FFMPEG = str(_BIN / "ffmpeg") if (_BIN / "ffmpeg").exists() else "ffmpeg"
 FFPROBE = str(_BIN / "ffprobe") if (_BIN / "ffprobe").exists() else "ffprobe"
 
+
+def ffmpeg_available() -> bool:
+    """True if ffmpeg can actually be run (bin/ffmpeg or on PATH)."""
+    import shutil
+    return shutil.which(FFMPEG) is not None
+
 # Royalty-free music pool. Drop .mp3/.m4a/.wav files here; reels rotate through
 # them and avoid recently-used tracks. Empty folder -> reels ship without music.
 MUSIC_DIR = Path(__file__).parent / "music"

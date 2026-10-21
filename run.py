@@ -201,6 +201,15 @@ def generate_batch(offset_days: int = 0):
     # ---- Amazon affiliate product recommendations -------------------------
     products = build_product_posts()
     alerts = []
+
+    # Reels are the main growth format — if they didn't render, make it LOUD.
+    if config.VIDEO_REELS_PER_RUN >= 1 and not video_reels:
+        if not config.ffmpeg_available():
+            alerts.append(
+                "⚠️ Reels did NOT render — ffmpeg is missing. Run ./install_ffmpeg.sh "
+                "in the love-lens-pipeline folder to fix. Reels are your main growth format.")
+        else:
+            alerts.append("⚠️ Reels did not render this batch (clip/encode issue). Check cron.log.")
     if config.PRODUCT_POSTS_PER_RUN >= 1:
         import fetch_products
         remaining = fetch_products.unposted_count()
