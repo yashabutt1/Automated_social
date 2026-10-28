@@ -224,12 +224,24 @@ def generate_batch(offset_days: int = 0):
     print("· writing reel scripts…")
     reels = gen_text.make_reels(config.REELS_PER_RUN)
 
-    (day_dir / "captions.json").write_text(
-        json.dumps({"cards": cards, "reels": reels, "video_reels": video_reels,
-                    "products": products, "engagement": engagement,
-                    "reflections": reflections, "alerts": alerts},
-                   indent=2),
-        encoding="utf-8")
+    captions_payload = {"cards": cards, "reels": reels, "video_reels": video_reels,
+                        "products": products, "engagement": engagement,
+                        "reflections": reflections, "alerts": alerts}
+    (day_dir / "captions.json").write_text(json.dumps(captions_payload, indent=2),
+                                           encoding="utf-8")
+
+    # Persist a lightweight copy into the committed history/ so de-duplication keeps
+    # working across ephemeral cloud runs (output/ is wiped each run). Keep last 40.
+    try:
+        config.HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+        (config.HISTORY_DIR / f"{day_dir.name}.json").write_text(
+            json.dumps(captions_payload, indent=2), encoding="utf-8")
+        old = sorted(config.HISTORY_DIR.glob("*.json"))[:-40]
+        for f in old:
+            f.unlink()
+    except Exception as exc:
+        print(f"  history persist skipped ({exc})")
+
     build_review_html(day_dir, cards, reels)
 
     return day_dir

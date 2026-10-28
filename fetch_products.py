@@ -122,7 +122,7 @@ def load_products() -> list[dict]:
 
 def _read_list(name: str) -> list[str]:
     try:
-        data = json.loads((config.OUTPUT_DIR / name).read_text(encoding="utf-8"))
+        data = json.loads((config.STATE_DIR / name).read_text(encoding="utf-8"))
         if isinstance(data, list):
             return [str(x) for x in data]
     except Exception:
@@ -132,8 +132,8 @@ def _read_list(name: str) -> list[str]:
 
 def _write_list(name: str, keys: list[str]) -> None:
     try:
-        (config.OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-        (config.OUTPUT_DIR / name).write_text(json.dumps(keys), encoding="utf-8")
+        (config.STATE_DIR).mkdir(parents=True, exist_ok=True)
+        (config.STATE_DIR / name).write_text(json.dumps(keys), encoding="utf-8")
     except Exception:
         pass
 

@@ -1,0 +1,73 @@
+name: Love Lens generate + queue
+
+# Twice a day at local peak windows. GitHub cron is UTC and may be delayed 5–30 min.
+# Times below are Pakistan time (UTC+5): morning and evening.
+on:
+  schedule:
+    - cron: "0 2 * * *"     # 07:00 PKT — morning
+    - cron: "0 14 * * *"    # 19:00 PKT — evening
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Generate only (NO Telegram queue)"
+        type: boolean
+        default: false
+
+# Shared with the poll workflow so pending.json is never written by two runs at once.
+concurrency:
+  group: lovelens-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system deps (ffmpeg + emoji font)
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-noto-color-emoji
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Write .env from secrets
+        run: |
+          umask 177
+          cat > .env <<'EOF'
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY=${{ secrets.PEXELS_API_KEY }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
+          FB_PAGE_TOKEN=${{ secrets.FB_PAGE_TOKEN }}
+          FB_PAGE_ID=${{ secrets.FB_PAGE_ID }}
+          AMAZON_ASSOC_TAG=${{ secrets.AMAZON_ASSOC_TAG }}
+          AMAZON_MARKETPLACE=www.amazon.com
+          EOF
+
+      - name: Unique batch id (keeps morning/evening separate in the queue)
+        run: echo "LOVELENS_SLOT=$(date -u +%H%M)" >> "$GITHUB_ENV"
+
+      - name: Generate batch
+        run: python run.py
+
+      - name: Queue to Telegram for approval
+        if: github.event.inputs.dry_run != 'true'
+        run: python cloud_queue.py
+
+      - name: Commit queue + state (dedup history, product rotation)
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "lovelens-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pending.json state history
+          git diff --staged --quiet || git commit -m "chore: queue batch + state [skip ci]"
+          git pull --rebase --autostash origin ${{ github.ref_name }} || true
+          git push || true

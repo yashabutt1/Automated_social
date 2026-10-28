@@ -33,36 +33,46 @@ def is_duplicate(new_text: str, existing_text: str) -> bool:
     return False
 
 
+def _fold_captions(payload: dict, used: set[str]) -> None:
+    for item in payload.get("cards", []):
+        for key in ("line", "body"):
+            value = item.get(key)
+            if value:
+                used.add(_normalize_text(value))
+    # Also remember engagement prompts and reel lines so nothing repeats.
+    for item in payload.get("engagement", []):
+        value = item.get("prompt")
+        if value:
+            used.add(_normalize_text(value))
+    for item in payload.get("video_reels", []):
+        value = item.get("line")
+        if value:
+            used.add(_normalize_text(value))
+    for item in payload.get("reflections", []):
+        value = item.get("essay")
+        if value:
+            used.add(_normalize_text(value))
+
+
 def load_used_content(output_root: Path | str) -> set[str]:
     output_root = Path(output_root)
     used: set[str] = set()
-    if not output_root.exists():
-        return used
 
-    for captions_file in sorted(output_root.glob("*/captions.json")):
+    # This run's local batches (output/) PLUS the committed history/ of past batches
+    # — history/ is what carries de-dup across ephemeral cloud runs.
+    files = []
+    if output_root.exists():
+        files += sorted(output_root.glob("*/captions.json"))
+    history = output_root.parent / "history"
+    if history.exists():
+        files += sorted(history.glob("*.json"))
+
+    for captions_file in files:
         try:
             payload = json.loads(captions_file.read_text(encoding="utf-8"))
         except Exception:
             continue
-
-        for item in payload.get("cards", []):
-            for key in ("line", "body"):
-                value = item.get(key)
-                if value:
-                    used.add(_normalize_text(value))
-        # Also remember engagement prompts and reel lines so nothing repeats.
-        for item in payload.get("engagement", []):
-            value = item.get("prompt")
-            if value:
-                used.add(_normalize_text(value))
-        for item in payload.get("video_reels", []):
-            value = item.get("line")
-            if value:
-                used.add(_normalize_text(value))
-        for item in payload.get("reflections", []):
-            value = item.get("essay")
-            if value:
-                used.add(_normalize_text(value))
+        _fold_captions(payload, used)
     return used
 
 

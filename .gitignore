@@ -22,5 +22,21 @@ fonts/Fraunces/
 bin/
 music/
 
-# Amazon product pool (your curated links)
-products.txt
+# Amazon product pool (your curated links) — committed so the cloud pipeline has it.
+# products.txt is tracked; keep real credentials out of it (just Name | /dp/ASIN links).
+
+# Cloud state that MUST persist across runs (committed):
+#   pending.json  — approval queue   | state/ — product rotation | history/ — dedup
+!pending.json
+!state/
+!history/
+
+# Local-only runtime artifacts (never commit to the cloud repo)
+posted/
+rejected/
+*.log
+*.err
+*.out
+.claude/
+last_update_offset.txt
+prompts_backup.py

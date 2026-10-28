@@ -177,6 +177,10 @@ REEL_FORMATS = [
 # Paths
 # ---------------------------------------------------------------------------
 OUTPUT_DIR = Path(__file__).parent / "output"
+# Committed state that must survive ephemeral cloud runs (output/ is wiped each run):
+# product rotation + a rolling history of past captions used for de-duplication.
+STATE_DIR = Path(__file__).parent / "state"
+HISTORY_DIR = Path(__file__).parent / "history"
 
 
 def slot_suffix() -> str:

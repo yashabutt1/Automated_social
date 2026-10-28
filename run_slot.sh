@@ -39,6 +39,8 @@ if LOVELENS_SLOT="$slot" "$VENV_PYTHON" run.py \
    && LOVELENS_SLOT="$slot" "$VENV_PYTHON" notify.py; then
   echo "$today" > "$marker"
   echo "$now ran $slot" >> "$LOG_FILE"
+  # Retention: keep only the 8 newest batch dirs so output/ doesn't balloon.
+  ls -dt "$PROJECT_DIR"/output/*/ 2>/dev/null | tail -n +9 | while read -r d; do rm -rf "$d"; done
 else
   echo "$now failed $slot, will retry on next wake/tick" >> "$LOG_FILE"
   exit 1

@@ -1,0 +1,107 @@
+# The Love Lens — Amazon product pool  (curated best-sellers)
+# Format:  Name / gift angle | https://www.amazon.com/dp/ASIN
+# Your tag (ynb0ec-20) is added to every link automatically.
+# Add or remove lines anytime; the pipeline rotates them and won't repeat a
+# product until the others have been used. Lines starting with # are ignored.
+
+Aromatherapy shower steamers spa set (8 pack) — self-care gift for her | https://www.amazon.com/dp/B0CHMDT2FM
+Preserved real rose with necklace — eternal roses keepsake gift | https://www.amazon.com/dp/B0CQVF4RHM
+ArtPix 3D crystal photo — personalized keepsake from your own picture | https://www.amazon.com/dp/B08P7MNXKY
+3D rose crystal night light — romantic keepsake lamp | https://www.amazon.com/dp/B07VZSYWM8
+"Not a day over fabulous" birthday mug gift set for her | https://www.amazon.com/dp/B07T2S93Z8
+16 forever roses in a heart gift box — romantic flowers that last | https://www.amazon.com/dp/B0BBBG4QMF
+Galaxy glass rose in a dome with butterfly — forever flower gift | https://www.amazon.com/dp/B0BGRQJ388
+Custom photo blanket throw — personalized cozy keepsake | https://www.amazon.com/dp/B0D6Y9PF2V
+Luna Bean hand casting kit — couples keepsake you make together | https://www.amazon.com/dp/B01E4LWBLQ
+Then & Now anniversary picture frame — 1 to 99 years | https://www.amazon.com/dp/B0C58YR44W
+"What I love about you" fill-in-the-blank love journal for couples | https://www.amazon.com/dp/B0FNDNP2N3
+Elephant love candle holder statue with flickering LED | https://www.amazon.com/dp/B09F67FMX5
+Anniversary wind chimes — thoughtful keepsake gift | https://www.amazon.com/dp/B0F13JS87X
+Get Well Soon self-care package — "sending a hug" comfort box | https://www.amazon.com/dp/B0F5M9793N
+13-piece spa gift basket for women — relaxation set | https://www.amazon.com/dp/B0DZHG6V6C
+11-piece sunflower spa gift basket — self-care set | https://www.amazon.com/dp/B0FM3ZGCDJ
+Get well soon care package — comfort basket after surgery | https://www.amazon.com/dp/B0GG9YLCSM
+GSPY long-distance relationship candle — gift for him or her | https://www.amazon.com/dp/B0G48L3KMF
+Crochet star comfort doll — emotional support long-distance gift | https://www.amazon.com/dp/B0DZD237PQ
+Personalized long-distance necklace — engraved keepsake | https://www.amazon.com/dp/B0B2QJ6YHZ
+Custom face photo pillow — cute personalized plush | https://www.amazon.com/dp/B0FG7MDYTX
+Couples connection cards — 50 conversation starters | https://www.amazon.com/dp/B0BMS441DT
+Let's Get Deep — question card game for couples' date night | https://www.amazon.com/dp/B08PQ14F57
+BestSelf Intimacy Deck — 170 conversation cards for couples | https://www.amazon.com/dp/B07W1PVNFC
+We're Not Really Strangers Couples Edition — conversation card game | https://www.amazon.com/dp/B0B7V56B7H
+Ultimate date night "Would You Rather?" game for couples | https://www.amazon.com/dp/0593435729
+Romantic couples gift set for him — boyfriend or husband | https://www.amazon.com/dp/B0CP1JMF2T
+"Drive safe" keychain for boyfriend or husband | https://www.amazon.com/dp/B08SW6S11X
+Tiger eye gemstone leather bracelet for men | https://www.amazon.com/dp/B0C28KY57G
+New mom care package after baby — 7-pc postpartum recovery set | https://www.amazon.com/dp/B0D5J2BVZB
+The Honest Company New Mama care gift set | https://www.amazon.com/dp/B0C1M1DQFC
+New mom gifts — 11-pc care package after baby | https://www.amazon.com/dp/B0CBC4C6G8
+The 5 Love Languages — the secret to love that lasts (book) | https://www.amazon.com/dp/080241270X
+The Love Language couples workbook — exercises & prompts | https://www.amazon.com/dp/B0GTX1GWCH
+His Needs, Her Needs — making romantic love last (book) | https://www.amazon.com/dp/0800740998
+Scented candles gift set for women — 6-pack aromatherapy | https://www.amazon.com/dp/B0CHYWN5W6
+Healing crystal candle gift set — amethyst & amazonite | https://www.amazon.com/dp/B0DR8FLCTD
+Soy wax scented candle gift set — 8 pack | https://www.amazon.com/dp/B0GF1NWKQX
+Magnetic matching couples bracelets (set of 2) | https://www.amazon.com/dp/B0CBK36P1T
+Personalized infinity matching couple bracelets | https://www.amazon.com/dp/B0CR6GLNX2
+Personalized photo picture frame — custom keepsake | https://www.amazon.com/dp/B0CRQWNR31
+Personalized anniversary couple photo frame | https://www.amazon.com/dp/B0D856SN7M
+Personalized charcuterie & cheese board gift set | https://www.amazon.com/dp/B0D4ZMNN16
+Custom star map art print — your special night sky | https://www.amazon.com/dp/B0GS6GZMYV
+Name a Star registry gift package | https://www.amazon.com/dp/B08MKRVFS5
+RENPHO heating pad for back & cramps — cozy relief gift | https://www.amazon.com/dp/B089D3Q24T
+Nekteck Shiatsu foot massager with heat | https://www.amazon.com/dp/B07WYX1D4H
+Self-care gift set for men — 7-piece pamper kit | https://www.amazon.com/dp/B0FL15TYJQ
+Bath & body gift set for men — cedar & bergamot | https://www.amazon.com/dp/B0DWX7BHDS
+LifeAround2Angels bath bombs gift set (12) | https://www.amazon.com/dp/B01MFGN8S5
+Essential oil gift set for diffusers | https://www.amazon.com/dp/B0FVF471VK
+Lagunamoon essential oils set (6 oils) | https://www.amazon.com/dp/B06XRLR9RQ
+ASAKUKI essential oil diffuser (500ml) | https://www.amazon.com/dp/B01MR4Y0CZ
+Levoit cool-mist humidifier & oil diffuser | https://www.amazon.com/dp/B09W21XFS5
+GeeBom 3-layer jewelry box organizer | https://www.amazon.com/dp/B0GTM7Z7F3
+Fuzzy cozy socks gift set for women | https://www.amazon.com/dp/B0GYNWB215
+Bedsure satin pillowcase set — silk-like, gentle on hair | https://www.amazon.com/dp/B0725WFLMB
+YnM weighted blanket (15 lbs) — cozy calm gift | https://www.amazon.com/dp/B073429DV2
+Romantic mini desk sign — "I Love You" keepsake | https://www.amazon.com/dp/B0CRZBSNWN
+Love knot necklace for women — 14K gold plated | https://www.amazon.com/dp/B0G3XPC1BZ
+"To My Soulmate" necklace for her | https://www.amazon.com/dp/B0CPXVSD2F
+"To My Beautiful Wife" love knot necklace | https://www.amazon.com/dp/B0CLRJR2SM
+Sterling silver infinity necklace for her | https://www.amazon.com/dp/B0DLGTX1T1
+"To My Mom" meaningful necklace | https://www.amazon.com/dp/B0DHRYK434
+Romantic wallet keepsake card for him or her | https://www.amazon.com/dp/B0B55SQZBX
+Engraved wallet insert card for boyfriend or husband | https://www.amazon.com/dp/B09FZ9D1LC
+Love coupon book for him — 20 romantic coupons | https://www.amazon.com/dp/B0D9M1NLD6
+Wooden love postbox with 50 mini love notes | https://www.amazon.com/dp/B0DQVG86TF
+20 "Open When" letters kit — long distance | https://www.amazon.com/dp/B0CY2HJ4Z3
+Galaxy projector + white-noise sound machine (aurora) | https://www.amazon.com/dp/B0GWLTDQ5R
+Northern lights aurora projector — 33 effects | https://www.amazon.com/dp/B0B4518KC2
+Astronaut galaxy star projector | https://www.amazon.com/dp/B09FL6YR9L
+Sunset lamp projector — romantic mood light | https://www.amazon.com/dp/B0BRN3SF9V
+BRIGHTWORLD 3D moon & galaxy lamp | https://www.amazon.com/dp/B07PY7GLKV
+Candle warmer lamp with timer | https://www.amazon.com/dp/B0CTJGJL2T
+Walnut wooden night light — heartfelt message gift | https://www.amazon.com/dp/B0GQLYNVZJ
+Ultimate Date Night game for couples (Relatable) | https://www.amazon.com/dp/B0CR4G7CPD
+Do or Drink — couples date night card game | https://www.amazon.com/dp/B0BSR6GTRQ
+Risky Couples — spicy date-night card game | https://www.amazon.com/dp/B0BPHYHSYK
+35 scratch-off date night ideas for couples | https://www.amazon.com/dp/B08YWP5QRF
+Why Don't We: Spice It Up — couples game | https://www.amazon.com/dp/B093BCC4VP
+Enno Vatti 100 Dates scratch-off bucket-list poster | https://www.amazon.com/dp/B08TQNMHVP
+Marriage milestone scratch-off poster — wedding gift | https://www.amazon.com/dp/B0CMJQK7LQ
+Ekouaer waffle-knit pajama set for women | https://www.amazon.com/dp/B09N3V12Q7
+Satin floral pajama set for women | https://www.amazon.com/dp/B0D22GFK7M
+Couples matching pajama set | https://www.amazon.com/dp/B0DFY1TPRK
+Bestie flannel throw blanket | https://www.amazon.com/dp/B0GYMZ74SV
+Best friend engraved keychain | https://www.amazon.com/dp/B0BVFR74VN
+Friendship desk plaque — wood & acrylic keepsake | https://www.amazon.com/dp/B0H9DBXD97
+Engagement couples coffee mug set (2) | https://www.amazon.com/dp/B09HC67H7M
+Mr & Mrs wedding coffee mug set | https://www.amazon.com/dp/B0814N45NZ
+Sterling silver gemstone necklace — adjustable | https://www.amazon.com/dp/B0FC1PZH8H
+Teddy bear made of a preserved real rose | https://www.amazon.com/dp/B0D7P58742
+Rosaura preserved roses gift box (7 roses) | https://www.amazon.com/dp/B0FHY378CZ
+House Gem coffee mug warmer for desk (timer) | https://www.amazon.com/dp/B0CCP46DK9
+Fujifilm Instax Mini 12 instant camera | https://www.amazon.com/dp/B0BWNYPCT1
+Photo clip string lights — 120 LED, remote | https://www.amazon.com/dp/B0895DDN47
+Bath bombs gift set — USA made, organic | https://www.amazon.com/dp/B00W2EH98I
+Sunset lamp projector with app control | https://www.amazon.com/dp/B0CJ4Z6Z7Z
+"To My Wife" sterling silver heart love-knot necklace | https://www.amazon.com/dp/B0FRF14VQS
+Love coupon book for couples — gold foil, 30 blank | https://www.amazon.com/dp/B0G449D5WV
