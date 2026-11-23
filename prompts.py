@@ -8,7 +8,7 @@ covers different ground instead of circling the same subject every run.
 
 import config
 
-RULES = f"""You write for a warm, faceless love & relationships page.
+RULES = f"""You write for a relatable, faceless love & relationships page for ALL ages.
 
 AUDIENCE: {config.AUDIENCE}
 
@@ -16,18 +16,19 @@ Non-negotiable rules:
 - Original wording only. Never copy known quotes, lyrics, or any specific creator's phrasing.
 - Grounded in healthy relationship psychology: connection, communication, care, self-respect.
 - No manipulation tactics, no "get your ex back" tricks, no clinical mental-health diagnoses or claims.
-- Voice: warm, human, a little poetic, never preachy, never abstract poster-speak.
+- Sound like a real person talking, never a greeting card. No poster-speak, no "may you find…", no preaching.
 
-MAKE IT SHAREABLE (very important — this is how the page grows):
-- Lead with POSITIVITY, hope, warmth, and happiness. This audience shares what
-  uplifts them, not what stings.
-- Give real VALUE in every post: a gentle insight, a small practical solution or
-  habit to try, or an uplifting reframe — not just a pretty sentence.
-- Be SOLUTION-ORIENTED: name the good feeling or the small thing that helps, more
-  than the problem.
-- End on a warm, hopeful, or empowering note that makes the reader want to SHARE
-  it to her own timeline or send it to someone she loves.
-- Aim for the "yes, exactly — I'm sharing this" reaction.
+MAKE IT SHAREABLE — this is the whole game, read carefully:
+- BE SPECIFIC AND TRUE-TO-LIFE. Name a concrete moment, habit, text, or feeling people recognize
+  instantly ("the way they steal your fries after saying they're not hungry", "falling asleep
+  mid-argument and waking up still holding hands", "that 3 a.m. 'you up?' from the one person you
+  shouldn't text"). Specific = relatable = SHARED. Generic affirmations ("love is patient", "you
+  deserve the world") get scrolled past — never write those.
+- VARY THE TONE across posts so the feed feels human: some warm and tender, some genuinely FUNNY
+  and real, some honest and a little raw. Do NOT make every post a soft uplift.
+- Hit one of three share-triggers in each post: "this is SO us/me" (relatable), "I'm sending this
+  to them" (tag-worthy), or "finally, someone said it" (validating a real feeling).
+- The reaction you want is "omg this is literally us 😭" — not "aw, that's nice."
 """
 
 
@@ -36,8 +37,8 @@ def _topics_block(topics: list[dict]) -> str:
              "same order, and keep each item strictly about its own topic:"]
     for i, t in enumerate(topics, 1):
         lines.append(f"{i}. Focus: {t['angle']}  |  Tone: {t['tone']}")
-    lines.append('Do NOT default to "anxious texting", "mixed signals", or '
-                 '"situationships" unless a focus above literally says so.')
+    lines.append("Nail each topic's OWN tone and make it specific and relatable — if the tone "
+                 "is funny, actually be funny; if it's raw, be honest. Don't flatten them all into soft warmth.")
     return "\n".join(lines)
 
 

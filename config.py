@@ -12,14 +12,14 @@ HANDLE = "@thelovelensforall"    # shown small on cards; set to "" to hide
 
 # Who actually follows the page (from Insights): shapes the voice of every post.
 AUDIENCE = (
-    "Your audience is mostly WOMEN aged 35-65+ in the United States — wives, moms, "
-    "and grandmothers who have loved, lost, and loved again. Write for mature grown "
-    "women reflecting on real, lasting love: marriage, long partnership, family, "
-    "raising kids, empty nests, healing after heartbreak later in life, faith, "
-    "gratitude, and self-worth earned over decades. Warm, heartfelt, a little "
-    "nostalgic, the kind of thing a woman proudly shares to her own timeline. AVOID "
-    "teen/Gen-Z dating slang, 'situationships', hookup culture, and texting-anxiety "
-    "framing unless a topic genuinely calls for it.")
+    "Your audience is ALL AGES and genders — anyone who loves, dates, is married, "
+    "single, healing, or just figuring it out (Gen Z to grandparents). Write RELATABLE "
+    "love & relationship content that makes a real person instantly think 'this is SO "
+    "me/us' or 'I'm sending this to someone'. Mix the registers across posts: some warm "
+    "and tender, some funny and real, some honest and a little raw. NOT generic "
+    "affirmations or greeting-card lines — specific, true-to-life moments people "
+    "recognize at a glance. The goal is SHARES, TAGS, and COMMENTS: content people send "
+    "to their partner, tag a friend in, or post because it names exactly what they feel.")
 
 # ---------------------------------------------------------------------------
 # Calls-to-action appended to captions to boost reach (follow/share/save/tag).
