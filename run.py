@@ -160,12 +160,9 @@ def generate_batch(offset_days: int = 0):
 
     cards = []
 
-    # One batched Gemini call for all quote lines, one for all paragraphs, so a
-    # full day stays well under the free-tier request cap.
-    print("· writing quote-card lines…")
-    line_items = gen_text.make_lines(line_topics)
-    # Paragraph cards prefer MEANINGFUL posts grounded in REAL relationship articles
-    # (so they actually say something), falling back to generic essays if none/quota.
+    # MEANINGFUL grounded posts get FIRST claim on the daily Gemini quota, so on a
+    # tight-quota day the real article-based content always wins over the generic
+    # fallbacks instead of losing the last request to a quote card.
     print("· fetching real relationship articles…")
     try:
         import relationship_sources
@@ -176,8 +173,16 @@ def generate_batch(offset_days: int = 0):
         print(f"  article fetch failed ({exc})")
         articles = []
     grounded = gen_text.make_grounded(articles[: len(para_topics)]) if para_topics else []
-    print(f"· writing paragraph cards… ({len(grounded)} grounded, rest generic)")
-    para_items = gen_text.make_paragraphs(para_topics)
+    print(f"· {len(grounded)} grounded paragraph post(s) ready")
+
+    # One batched Gemini call for all quote lines; a second for generic essays only
+    # if grounded posts didn't fill every paragraph slot (saves a request otherwise).
+    print("· writing quote-card lines…")
+    line_items = gen_text.make_lines(line_topics)
+    para_items = []
+    if len(grounded) < len(para_topics):
+        print("· writing fallback paragraph essays…")
+        para_items = gen_text.make_paragraphs(para_topics)
 
     for i, (topic, item) in enumerate(zip(line_topics, line_items), 1):
         # Regenerate just this item if its wording duplicates something posted before.
