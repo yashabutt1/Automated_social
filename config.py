@@ -125,8 +125,10 @@ FONT_SMALL = Path(__file__).parent / "fonts" / "static" / "Fraunces_72pt-SemiBol
 # Elegant script font for the short title on each card (the "Love Journey" look).
 # Snell Roundhand ships with macOS. On another OS, drop a script .ttf into ./fonts
 # and point here; if it's missing the code falls back to Fraunces italic.
-FONT_SCRIPT = Path("/System/Library/Fonts/Supplemental/SnellRoundhand.ttc")
-FONT_SCRIPT_FALLBACK = Path(__file__).parent / "fonts" / "static" / "Fraunces_72pt-SemiBoldItalic.ttf"
+# Modern look: titles use bold Fraunces (a contemporary serif), NOT a cursive script
+# (SnellRoundhand read as dated/wedding-invitation "grandma").
+FONT_SCRIPT = Path(__file__).parent / "fonts" / "static" / "Fraunces_72pt-Black.ttf"
+FONT_SCRIPT_FALLBACK = Path(__file__).parent / "fonts" / "static" / "Fraunces_72pt-Black.ttf"
 
 # ---------------------------------------------------------------------------
 # Background moods -> local palette choices used by the Pillow renderer.

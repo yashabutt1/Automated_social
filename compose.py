@@ -140,19 +140,9 @@ def _cluster(canvas, cx, cy, scale):
 
 
 def _draw_florals(base):
-    """Overlay soft floral accents in the bottom corners (and a top accent)."""
-    w, h = base.size
-    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    scale = w / 1080.0
-    # bottom corners — the heaviest decoration, like the example
-    _cluster(canvas, int(w * 0.10), int(h * 0.95), scale)
-    _cluster(canvas, int(w * 0.90), int(h * 0.96), scale)
-    if random.random() < 0.6:
-        _cluster(canvas, int(w * 0.93), int(h * 0.07), scale * 0.7)
-    canvas = canvas.filter(ImageFilter.GaussianBlur(radius=1.2))
-    base = base.convert("RGB")
-    base.paste(canvas, (0, 0), canvas)
-    return base
+    """Floral corner accents read as dated/'grandma', so they're disabled — the card
+    is now clean (photo + gradient + type only). Kept as a no-op for compatibility."""
+    return base.convert("RGB") if base.mode != "RGB" else base
 
 
 # ---------------------------------------------------------------------------

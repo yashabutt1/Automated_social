@@ -177,7 +177,7 @@ TOPICS: list[dict] = [
         "category": "committed",
         "angle": "the deep, unshowy love that grows over years of choosing each other",
         "tone": "warm, steady, moving",
-        "pexels_queries": ["older couple holding hands", "couple growing old together", "couple silhouette beach"],
+        "pexels_queries": ["couple holding hands", "couple growing old together", "couple silhouette beach"],
         "mood": "soft beach silhouette at dusk, calm and enduring",
     },
     {
@@ -353,7 +353,7 @@ TOPICS: list[dict] = [
         "category": "committed",
         "angle": "the small daily habits that quietly keep love alive for decades — name one or two you can start today",
         "tone": "warm, encouraging, practical",
-        "pexels_queries": ["older couple cooking together", "mature couple morning coffee", "senior couple gardening"],
+        "pexels_queries": ["couple cooking together", "happy couple morning coffee", "senior couple gardening"],
         "mood": "warm homey light, everyday devotion",
     },
     {
@@ -361,7 +361,7 @@ TOPICS: list[dict] = [
         "category": "gratitude",
         "angle": "the simple practice of noticing and thanking your partner out loud, and how it changes a marriage",
         "tone": "warm, uplifting, grateful",
-        "pexels_queries": ["older couple grateful smiling", "mature couple holding hands table", "couple thank you hug"],
+        "pexels_queries": ["couple grateful smiling", "happy couple holding hands table", "couple thank you hug"],
         "mood": "soft grateful light, tender",
     },
     {
@@ -369,7 +369,7 @@ TOPICS: list[dict] = [
         "category": "communication",
         "angle": "how a sincere, humble 'I'm sorry' repairs and actually strengthens a long relationship — the little lesson",
         "tone": "gentle, wise, hopeful",
-        "pexels_queries": ["older couple reconciling hands", "mature couple serious talk", "couple forgiveness embrace"],
+        "pexels_queries": ["couple reconciling hands", "happy couple serious talk", "couple forgiveness embrace"],
         "mood": "warm reconciled light, gentle",
     },
     {
@@ -377,7 +377,7 @@ TOPICS: list[dict] = [
         "category": "committed",
         "angle": "finding each other again after years of raising a family — small ways to come back together",
         "tone": "warm, hopeful, reassuring",
-        "pexels_queries": ["mature couple date night", "empty nest couple home", "older couple walking park"],
+        "pexels_queries": ["happy couple date night", "empty nest couple home", "couple walking park"],
         "mood": "warm golden light, rediscovered closeness",
     },
     {
@@ -385,7 +385,7 @@ TOPICS: list[dict] = [
         "category": "playful",
         "angle": "keeping romance, laughter, and flirting alive in a long marriage — proof the spark doesn't retire",
         "tone": "warm, playful, joyful",
-        "pexels_queries": ["senior couple dancing home", "older couple laughing beach", "mature couple playful kitchen"],
+        "pexels_queries": ["senior couple dancing home", "couple laughing beach", "happy couple playful kitchen"],
         "mood": "bright joyful warm light",
     },
     {
@@ -393,7 +393,7 @@ TOPICS: list[dict] = [
         "category": "hope",
         "angle": "the reminder that your happiest chapter and deepest love may still be ahead — it is never too late",
         "tone": "hopeful, uplifting, warm",
-        "pexels_queries": ["mature woman hopeful sunrise", "older couple sunset horizon", "woman smiling golden light"],
+        "pexels_queries": ["woman hopeful sunrise", "couple sunset horizon", "woman smiling golden light"],
         "mood": "golden sunrise, hopeful and open",
     },
     {
@@ -401,15 +401,15 @@ TOPICS: list[dict] = [
         "category": "communication",
         "angle": "the simple phrases that instantly make a partner feel loved, safe, and seen — try one tonight",
         "tone": "warm, practical, tender",
-        "pexels_queries": ["older couple close talking", "mature couple forehead touch", "couple whispering tender"],
+        "pexels_queries": ["couple close talking", "happy couple forehead touch", "couple whispering tender"],
         "mood": "soft intimate warm light",
     },
     {
-        "id": "grandmother_wisdom",
+        "id": "woman_wisdom",
         "category": "warm",
-        "angle": "the timeless love advice passed down from mothers and grandmothers that still holds true",
+        "angle": "the timeless love advice passed down from mothers and womans that still holds true",
         "tone": "nostalgic, warm, wise",
-        "pexels_queries": ["grandmother hands tea", "multigenerational family warm", "older woman smiling window"],
+        "pexels_queries": ["woman hands tea", "multigenerational family warm", "woman smiling window"],
         "mood": "soft nostalgic light, timeless and warm",
     },
     {
@@ -417,7 +417,7 @@ TOPICS: list[dict] = [
         "category": "selflove",
         "angle": "choosing small daily joys and gratitude together — happiness as a habit you build, not a thing you wait for",
         "tone": "uplifting, warm, positive",
-        "pexels_queries": ["older woman laughing joyful", "mature couple sunshine happy", "woman gratitude flowers"],
+        "pexels_queries": ["woman laughing joyful", "happy couple sunshine happy", "woman gratitude flowers"],
         "mood": "bright cheerful light, joyful",
     },
     # ---- funny / relatable (broad, all-ages, highly shareable) ------------
