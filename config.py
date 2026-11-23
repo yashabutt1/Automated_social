@@ -54,13 +54,15 @@ DECORATE_FLORALS = True
 # REELS-FIRST: reels are the only format Facebook pushes to NON-followers, so
 # they're weighted heaviest. Feed cards mostly reach existing followers, so they
 # are trimmed. Paragraph cards stay (older-women audiences love & share them).
-CARDS_PER_RUN = 1      # short quote cards (-> ~2/day)
-PARAGRAPH_CARDS_PER_RUN = 1  # heartfelt micro-essay cards (-> ~2/day, shareable)
+# FUN-FIRST mix: the feed is quizzes/games/fun-facts + specialist articles + reels.
+# The old "dead quote" formats (short quote cards, famous-quote essays) are OFF.
+CARDS_PER_RUN = 0      # short quote cards — OFF (read as dead quotes, people scroll past)
+PARAGRAPH_CARDS_PER_RUN = 1  # grounded specialist-article posts (-> ~2/day, meaningful)
 REELS_PER_RUN = 0      # reel SCRIPTS are not posted — off to save Gemini quota
 VIDEO_REELS_PER_RUN = 2  # finished video reels (-> ~4/day, the growth engine)
 PRODUCT_POSTS_PER_RUN = 1  # Amazon affiliate product recommendations (-> ~2/day)
-ENGAGEMENT_POSTS_PER_RUN = 1  # interactive "comment below" posts (-> ~2/day)
-REFLECTION_POSTS_PER_RUN = 1  # long-form essay woven around a famous quote (-> ~2/day)
+ENGAGEMENT_POSTS_PER_RUN = 2  # FUN interactive cards: quiz/this-or-that/would-you-rather/fun-fact (-> ~4/day)
+REFLECTION_POSTS_PER_RUN = 0  # long-form famous-quote essay — OFF (reads as a dead quote)
 
 # ---------------------------------------------------------------------------
 # Amazon Associates (manual-link mode — no PA-API)
@@ -156,15 +158,14 @@ STYLE_SUFFIX = (
 # ---------------------------------------------------------------------------
 # Rotating reel-script formats (matches your starter kit)
 # ---------------------------------------------------------------------------
+# FUN, interactive formats — quizzes & games people tap, answer, and tag friends in.
+# (Driven directly by prompts.engagement_prompt now; kept here for reference/tuning.)
 ENGAGEMENT_FORMATS = [
-    "A 'share if you agree' positive affirmation — a warm, uplifting truth about love or marriage that women proudly re-share to their own timeline (e.g. 'A good husband is a blessing, not a given. Share if you're grateful for yours.')",
-    "A tiny PRACTICAL tip or habit that makes a relationship better today — real, useful value people save and share",
-    "Finish the sentence: the best love advice my mother or grandmother ever gave me was ______ (nostalgic, highly shareable)",
-    "A hopeful blessing / gentle reminder for someone who needs it today (invites 'tag someone' and shares)",
-    "A question about relationship truths (e.g. 'What's one thing decades of love has taught you?')",
-    "Fill-in-the-blank (e.g. 'After all these years, real love feels like ______.')",
-    "A surprising TRUE, uplifting fun fact about love/long marriages/the science of connection + a warm question",
-    "Finish the sentence (e.g. 'I feel most loved when...')",
+    "this_or_that — two concrete, relatable everyday options to pick between (fun, a little cheeky)",
+    "would_you_rather — two tempting or funny relationship dilemmas",
+    "quiz — a playful question + 2-4 short answer options people choose from",
+    "fun_fact — one surprising, TRUE, uplifting fact about love/attraction/the science of connection",
+    "finish_sentence — a relatable sentence stem people complete in the comments",
 ]
 
 REEL_FORMATS = [

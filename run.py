@@ -177,8 +177,9 @@ def generate_batch(offset_days: int = 0):
 
     # One batched Gemini call for all quote lines; a second for generic essays only
     # if grounded posts didn't fill every paragraph slot (saves a request otherwise).
-    print("· writing quote-card lines…")
-    line_items = gen_text.make_lines(line_topics)
+    line_items = gen_text.make_lines(line_topics) if line_topics else []
+    if line_topics:
+        print("· writing quote-card lines…")
     para_items = []
     if len(grounded) < len(para_topics):
         print("· writing fallback paragraph essays…")
@@ -297,38 +298,65 @@ def build_engagement_posts(day_dir, used_content):
     import compose
     import random
 
-    print("· writing engagement posts…")
+    print("· writing fun interactive posts (quizzes / games / fun facts)…")
     items = gen_text.make_engagement(config.ENGAGEMENT_POSTS_PER_RUN)
+    default_header = {"this_or_that": "This or That", "would_you_rather": "Would You Rather",
+                      "quiz": "Quick Quiz", "fun_fact": "Did You Know?",
+                      "finish_sentence": "Finish This"}
+
+    def _unpack(it):
+        fmt = (it.get("format") or "").strip()
+        header = (it.get("header") or default_header.get(fmt, "Your Turn")).strip()
+        prompt = (it.get("prompt") or "").strip()
+        opts = [str(o).strip() for o in (it.get("options") or []) if str(o).strip()]
+        key = (prompt + " | " + " / ".join(opts)).strip(" |")
+        return fmt, header, prompt, opts, key
+
     posts = []
     for i, item in enumerate(items, 1):
-        item = _dedup_one(item, used_content, "prompt",
-                          lambda: gen_text.make_engagement(1)[0])
-        text = (item.get("prompt") or "").strip()
-        if not text:
+        fmt, header, prompt, opts, key = _unpack(item)
+        # regenerate once if this exact game/prompt has been posted before
+        if not key or dedupe._normalize_text(key) in used_content:
+            try:
+                item = gen_text.make_engagement(1)[0]
+                fmt, header, prompt, opts, key = _unpack(item)
+            except Exception:
+                pass
+        if not key:
             continue
+        used_content.add(dedupe._normalize_text(key))
+
         query = random.choice(_ENGAGE_BG_QUERIES)
         bg = gen_image.make_background(query, day_dir / "backgrounds" / f"engage_{i}.png")
         card_file = f"engage_{i}.png"
-        # longer/fact-style prompts read better as a paragraph card
-        if len(text) > 90 or "\n" in text:
-            compose.make_paragraph_card(bg, text, day_dir / "cards" / card_file,
-                                        title=item.get("title"))
+        out = day_dir / "cards" / card_file
+
+        if fmt in ("this_or_that", "would_you_rather", "quiz") and len(opts) >= 2:
+            footer = "COMMENT YOUR ANSWER" if fmt == "quiz" else "COMMENT YOUR PICK BELOW"
+            # a quiz needs its question on the card; the 2-option games don't
+            compose.make_poll_card(bg, header, opts, out, footer=footer,
+                                   question=prompt if fmt == "quiz" else None)
+            q = (prompt + " — ") if (fmt == "quiz" and prompt) else ""
+            on_card = f"{q}{header}: " + "  /  ".join(opts)
         else:
-            compose.make_card(bg, text, day_dir / "cards" / card_file,
-                              title=item.get("title"))
+            footer = "TAG SOMEONE WHO'D LOVE THIS" if fmt == "fun_fact" else "DROP YOUR ANSWER BELOW"
+            compose.make_prompt_card(bg, header, prompt, out, footer=footer)
+            on_card = prompt
+
         tags = " ".join("#" + t.lstrip("#") for t in item.get("hashtags", []))
-        caption = _with_cta((item.get("caption") or text).strip(), config.CTA_FOLLOW)
+        caption = _with_cta((item.get("caption") or on_card).strip(), config.CTA_FOLLOW)
         if tags:
             caption = f"{caption}\n\n{tags}"
         posts.append({
             "file": card_file,
-            "title": item.get("title"),
-            "prompt": text,
+            "format": fmt,
+            "header": header,
+            "prompt": on_card,
             "caption": caption,
             "hashtags": item.get("hashtags", []),
             "kind": "engagement",
         })
-        print(f"    + engagement: {text[:50]}")
+        print(f"    + {fmt or 'prompt'}: {on_card[:55]}")
     return posts
 
 

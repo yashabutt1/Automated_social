@@ -144,30 +144,41 @@ Respond with ONLY a JSON object, no markdown:
 {{"title": "...", "essay": "...", "hashtags": ["...", "..."]}}"""
 
 
-def engagement_prompt(n: int, formats: list[str]) -> str:
-    """Interactive posts designed to pull comments."""
-    fmt_list = "\n".join(f"- {f}" for f in formats)
+def engagement_prompt(n: int) -> str:
+    """FUN, interactive 'tap / answer / tag' posts — quizzes, games, fun facts."""
     return f"""{RULES}
-Write {n} highly engaging, comment-baiting posts for a love & relationships page.
-The whole point is to make people STOP and reply. Rotate across these formats
-(use a different one for each of the {n} items):
-{fmt_list}
 
-For each post:
-- "prompt": the short, punchy text that goes ON the card (max ~14 words for
-  questions; for a fun-fact use 1-2 short sentences with the surprising fact).
-  Make it irresistible to answer or react to. No hashtags on the card.
-- "title": a 1-3 word script-font header, e.g. "Your Turn", "Tell Me",
-  "Real Talk", "Did You Know", "This or That", "Finish This".
-- "caption": the Facebook caption — restate/expand the hook and EXPLICITLY invite
-  a comment (e.g. "👇 Drop your answer below — I read every one."). Warm, human.
+Write {n} FUN, interactive love & relationship posts for a faceless page — the
+kind people can't help but tap, answer, or tag someone in. Playful, modern,
+specific, genuinely entertaining — NOT soft affirmations and NOT quotes.
+
+Rotate the FORMAT across the {n} items (use a DIFFERENT one for each):
+- "this_or_that": two concrete, relatable options to pick between
+  (e.g. "Big spontaneous trip" vs "Cozy weekend in"). Everyday and a little cheeky.
+- "would_you_rather": two tempting or funny relationship dilemmas
+  (e.g. "Always know what they're thinking" vs "Never argue again").
+- "quiz": one playful question + 2-4 short answer options people choose from
+  (e.g. "What's your love language, really?").
+- "fun_fact": ONE surprising, TRUE, uplifting fact about love, attraction, or the
+  science of connection. No made-up statistics — if unsure, use a safe, known fact.
+- "finish_sentence": a relatable sentence stem people complete in the comments
+  (e.g. "I knew it was real when ______").
+
+For each item return:
+- "format": this_or_that | would_you_rather | quiz | fun_fact | finish_sentence
+- "header": a 2-3 word card label in Title Case (e.g. "This or That",
+  "Would You Rather", "Quick Quiz", "Did You Know?", "Finish This").
+- "prompt": the MAIN line that goes on the card — the question, the fact, or the
+  sentence stem. Punchy, max ~16 words. For this_or_that / would_you_rather this can
+  be a short teaser or empty; the options carry it.
+- "options": for this_or_that & would_you_rather EXACTLY 2 short options (max ~6
+  words each); for quiz 2-4 short options; for fun_fact & finish_sentence an empty [].
+- "caption": a warm, human Facebook caption that restates the hook and EXPLICITLY
+  invites a comment or tag (e.g. "👇 Pick one and tell me why"). 1-2 sentences.
 - "hashtags": 6-9, broad + niche.
 
-Fun-fact items must be TRUE and about love/attraction/relationships psychology or
-history — no made-up statistics. If unsure, choose a safe, well-known fact.
-
 Respond with ONLY a JSON array of exactly {n} objects, no markdown:
-[{{"title":"...","prompt":"...","caption":"...","hashtags":["...","..."]}}]"""
+[{{"format":"...","header":"...","prompt":"...","options":["...","..."],"caption":"...","hashtags":["...","..."]}}]"""
 
 
 def product_prompt(names: list[str]) -> str:
