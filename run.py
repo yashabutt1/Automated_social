@@ -164,7 +164,19 @@ def generate_batch(offset_days: int = 0):
     # full day stays well under the free-tier request cap.
     print("· writing quote-card lines…")
     line_items = gen_text.make_lines(line_topics)
-    print("· writing paragraph cards…")
+    # Paragraph cards prefer MEANINGFUL posts grounded in REAL relationship articles
+    # (so they actually say something), falling back to generic essays if none/quota.
+    print("· fetching real relationship articles…")
+    try:
+        import relationship_sources
+        import random as _r
+        articles = relationship_sources.fetch_articles()
+        _r.shuffle(articles)
+    except Exception as exc:
+        print(f"  article fetch failed ({exc})")
+        articles = []
+    grounded = gen_text.make_grounded(articles[: len(para_topics)]) if para_topics else []
+    print(f"· writing paragraph cards… ({len(grounded)} grounded, rest generic)")
     para_items = gen_text.make_paragraphs(para_topics)
 
     for i, (topic, item) in enumerate(zip(line_topics, line_items), 1):
@@ -180,17 +192,34 @@ def generate_batch(offset_days: int = 0):
         cards.append({**item, "file": card_file, "topic": topic["id"],
                       "caption": _with_cta(item.get("caption"), config.CTA_FOLLOW, config.CTA_SHARE)})
 
-    for i, (topic, item) in enumerate(zip(para_topics, para_items), 1):
-        item = _dedup_one(item, used_content, "body",
-                          lambda t=topic: gen_text.make_paragraphs([t])[0])
-        print(f"· paragraph card {i}/{len(para_topics)} — topic '{topic['id']}' — background…")
+    for i, topic in enumerate(para_topics, 1):
+        if grounded:
+            # MEANINGFUL post grounded in a real relationship article.
+            item = grounded.pop(0)
+            caption = _with_cta(item.get("caption"), config.CTA_FOLLOW, config.CTA_SAVE)
+            src = item.get("source")
+            if src:
+                caption += f"\n\n(Inspired by writing from {src}.)"
+            kind = f"grounded · {src or 'article'}"
+        else:
+            # Fallback: generic micro-essay for this topic.
+            item = para_items[i - 1] if i - 1 < len(para_items) else {}
+            item = _dedup_one(item, used_content, "body",
+                              lambda t=topic: gen_text.make_paragraphs([t])[0])
+            caption = _with_cta(item.get("caption"), config.CTA_FOLLOW, config.CTA_SAVE)
+            kind = "generic"
+        body = item.get("body", "")
+        if not body:
+            continue
+        print(f"· paragraph card {i}/{len(para_topics)} — {kind} — background…")
         bg = gen_image.make_background(topic, day_dir / "backgrounds" / f"para_{i}.png")
         card_file = f"paragraph_{i}.png"
         print("  composing paragraph…")
-        compose.make_paragraph_card(bg, item["body"], day_dir / "cards" / card_file,
+        compose.make_paragraph_card(bg, body, day_dir / "cards" / card_file,
                                     title=item.get("title"))
-        cards.append({**item, "file": card_file, "body": item["body"], "topic": topic["id"],
-                      "caption": _with_cta(item.get("caption"), config.CTA_FOLLOW, config.CTA_SAVE)})
+        used_content.add(body)
+        cards.append({**item, "file": card_file, "body": body, "topic": topic["id"],
+                      "caption": caption})
 
     # ---- video reels: stock clip + branded text + music -------------------
     video_reels = build_video_reels(day_dir, reel_topics, used_content)

@@ -10,7 +10,7 @@ class ParagraphCardTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             out_path = Path(tmpdir) / "paragraph.png"
             body = "First line of the story.\nSecond line still feels real.\nThird line closes it softly."
-            result = make_paragraph_card(body, out_path)
+            result = make_paragraph_card(None, body, out_path)
             self.assertEqual(result, str(out_path))
             self.assertTrue(out_path.exists())
             self.assertTrue(out_path.stat().st_size > 0)

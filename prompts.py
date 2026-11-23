@@ -68,6 +68,31 @@ no markdown, no backticks:
 Give 6 to 9 hashtags each, mixing broad and niche, relevant to that item's topic."""
 
 
+def grounded_prompt(articles: list[dict]) -> str:
+    """Turn REAL relationship articles into original, MEANINGFUL posts (not quotes)."""
+    n = len(articles)
+    blocks = "\n".join(
+        f'{i+1}. ARTICLE: "{a["title"]}" — {(a.get("summary") or "")[:300]} (via {a["source"]})'
+        for i, a in enumerate(articles))
+    return f"""{RULES}
+
+You are turning REAL relationship articles into original, GENUINELY USEFUL posts — the
+kind that actually helps or makes someone feel deeply seen, NOT a vague quote. For each
+article, write a post that captures its real insight or advice IN YOUR OWN WORDS: a
+specific, true takeaway the reader can use or recognize. Be concrete (name the behaviour,
+the feeling, the small shift). Do NOT copy the article's phrasing, do NOT invent studies
+or statistics, and stay accurate to the article's actual point. Match a real, grounded
+voice — honest and warm, not greeting-card.
+
+ARTICLES (write one post for EACH, in order):
+{blocks}
+
+{_title_rule()}
+
+Respond with ONLY a JSON array of exactly {n} objects, same order, no markdown:
+[{{"title": "1-3 word phrase", "body": "4-6 short sentences delivering the real insight/advice, specific and honest, ending with a reflective question for the comments", "caption": "one line + a soft question for the comments", "hashtags": ["5 to 8 relevant tags"]}}]"""
+
+
 def paragraph_prompt(topics: list[dict]) -> str:
     """Prompt for one micro-essay card per topic (single batched call)."""
     n = len(topics)

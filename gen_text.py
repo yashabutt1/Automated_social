@@ -228,6 +228,28 @@ def make_paragraphs(topics: list[dict]):
         return _fallback_paragraphs(topics)
 
 
+def make_grounded(articles: list[dict]):
+    """Turn real relationship articles into meaningful posts. One batched Gemini call
+    -> {title, body, caption, hashtags, source, link} per article. Returns [] if the
+    model is unavailable (no local fallback — grounded posts need real source text)."""
+    if not articles or _client is None:
+        return []
+    try:
+        resp = _client.models.generate_content(
+            model=config.TEXT_MODEL, contents=prompts.grounded_prompt(articles))
+        parsed = _parse_json(resp.text)
+        out = []
+        for a, item in zip(articles, parsed if isinstance(parsed, list) else []):
+            if isinstance(item, dict) and (item.get("body") or "").strip():
+                item["source"] = a.get("source")
+                item["link"] = a.get("link")
+                out.append(item)
+        return out
+    except Exception as exc:
+        print(f"  grounded generation failed ({exc}); skipping grounded posts")
+        return []
+
+
 def _fallback_product_caption(name: str) -> str:
     return (f"Someone just came to mind, didn't they? 💛 {name} — the kind of "
             f"little 'I'm thinking of you' gift that makes their whole day softer. "
