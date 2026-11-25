@@ -44,6 +44,25 @@ def _save(state: dict) -> None:
     PENDING.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 
+def _refresh_items(state: dict) -> None:
+    """Pull the latest queued items from the repo so a long-running poll also sees
+    cards that the generate workflow queued AFTER this job checked out. The poll is
+    otherwise stateless: it never writes pending.json, so it can never race the
+    generate workflow. Telegram itself is the source of truth for 'already handled'
+    (a tap is delivered once and then confirmed server-side)."""
+    url = os.getenv("PENDING_URL", "").strip()
+    if not url:
+        return
+    try:
+        r = requests.get(url, timeout=20, headers={"Cache-Control": "no-cache"})
+        if r.ok:
+            remote = r.json().get("items")
+            if isinstance(remote, dict) and remote:
+                state["items"] = remote
+    except Exception as exc:
+        print(f"  (item refresh skipped: {exc})", flush=True)
+
+
 def _get_updates(offset: int, long_poll: int = 0):
     r = requests.get(f"https://api.telegram.org/bot{_token()}/getUpdates",
                      params={"offset": offset, "timeout": long_poll,
@@ -128,7 +147,6 @@ def _poll_once(state, long_poll: int = 0) -> int:
             print(f"post failed for {cb}: {exc}")
 
     state["offset"] = offset
-    _save(state)
     return posted
 
 
@@ -136,12 +154,26 @@ def main():
     import time
     budget = int(os.getenv("LOVELENS_POLL_SECONDS", "0") or 0)
     deadline = time.time() + budget
+    # One in-memory state for the whole run. Start the offset at 0: Telegram only
+    # returns updates it hasn't confirmed yet, and each long-poll iteration confirms
+    # the previous batch, so handled taps never come back even though we persist
+    # nothing. This makes the poll immune to the pending.json write race.
+    state = _load()
+    state["offset"] = 0
     total = 0
+    loops = 0
     while True:
-        total += _poll_once(_load(), long_poll=25 if budget else 0)
+        loops += 1
+        try:
+            _refresh_items(state)
+            total += _poll_once(state, long_poll=25 if budget else 0)
+        except Exception as exc:
+            # A transient Telegram/network hiccup must never kill a long poll run.
+            print(f"  poll iteration error (continuing): {exc}", flush=True)
+            time.sleep(5)
         if budget <= 0 or time.time() >= deadline:
             break
-    print(f"posted {total}; offset persisted")
+    print(f"posted {total}; polled {loops}x over ~{budget}s")
 
 
 if __name__ == "__main__":
